@@ -1,0 +1,160 @@
+
+
+.main-header {
+    background-image: url('https://quannhautudo.com/Static/web_images/header-bg-web.jpg');
+    padding: 0px 20px; 
+    width: 100%;
+    background-size: contain;
+    position: fixed;
+    z-index: var(--z-index-fixed);
+    height: 70px;
+    display: flex;
+    align-items: center;
+}
+
+.main-header .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    color: #fff;
+    font-weight: bold;
+}
+
+.logo i {
+    color: var(--colorYellow); /* ngôi sao vàng */
+    font-size: 24px;
+    margin-right: 8px;
+}
+
+.logo-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+}
+
+.logo-top {
+    font-size: 14px;
+    letter-spacing: 1px;
+}
+
+.logo-bottom {
+    font-size: 26px;
+    font-weight: 700;
+}
+
+.hotline {
+    text-align: right;
+    margin-left: 20px;
+    margin-right: auto;
+    color: #fff;
+}
+
+.hotline p {
+    margin: 0;
+    font-size: 12px;
+}
+
+.hotline strong {
+    color: var(--colorYellow); /* màu vàng */
+    font-size: 20px;
+}
+
+.main-nav {
+   background: transparent !important;
+}
+
+.main-nav ul {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.main-nav li {
+    margin: 0 13px;
+
+}
+
+.main-nav a {
+    text-decoration: none;
+    color: #fff;
+    font-weight: var(--font-weight-semibold);
+    font-size: 13px;
+    transition: color 0.3s;
+}
+
+.main-nav a:hover {
+    color: var(--colorYellow);
+    text-decoration: none;
+    
+}
+
+
+/* ========== Dropdown chọn cơ sở trong header ========== */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-branch-selector {
+    position: relative;
+}
+
+.change-branch-btn {
+    background: var(--colorPrimary);
+    color: #fff;
+    border: 2px solid var(--colorPrimary);
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.change-branch-btn i.fa-map-marker-alt { color: var(--colorYellow); }
+
+.change-branch-btn:hover {
+    background: #fff;
+    color: var(--colorPrimary);
+}
+
+.header-branch-dropdown {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    width: 320px;
+    max-height: 360px;
+    overflow: auto;
+    background: #fff;
+    border: 1px solid var(--colorLine);
+    border-radius: 10px;
+    box-shadow: var(--shadow-lg);
+    padding: 8px;
+    z-index: var(--z-index-popover);
+}
+
+.header-branch-dropdown[aria-hidden="true"] { display: none; }
+
+.header-branch-item {
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.header-branch-item:hover {
+    background: rgba(255, 168, 39, 0.08);
+}
+.hbi-name { font-weight: 700; color: var(--colorPrimary); }
+.hbi-addr { font-size: 12px; color: #666; }

@@ -1,0 +1,156 @@
+.main-footer-bottom {
+    position: relative;
+    background-color: var(--colorPrimary);
+    padding: 60px 0 40px; 
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    margin-top: auto;
+    text-align: center;
+}
+
+.container-footer {
+    width: 100%;
+    max-width: 1200px; 
+    margin: 0 auto;
+    padding: 0 120px;
+    box-sizing: border-box;
+}
+
+.footer-grid {
+    display: flex; 
+    justify-content: space-between;
+    flex-wrap: wrap; /* Cho phép rớt dòng khi màn hình nhỏ */
+    gap: 40px;
+}
+
+.footer-group {
+    display: flex;
+    gap: 50px; /* Khoảng cách giữa các cột con */
+}
+
+.footer-col .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    font-size: 20px;
+    color: var(--colorYellow);
+}
+
+.footer-col .logo-text span {
+    font-weight: 800;
+    color: #fff;
+}
+
+.btn-booking {
+    display: inline-block;
+    padding: 10px 25px;
+    background-color: var(--colorYellow);
+    color: var(--colorPrimary);
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 4px;
+    transition: 0.3s;
+}
+
+.btn-booking:hover {
+    background-color: #fff;
+}
+
+.footer-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-nav li {
+    margin-bottom: 12px;
+}
+
+.footer-nav a {
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+.footer-nav a:hover {
+    color: var(--colorYellow);
+    padding-left: 5px; /* Hiệu ứng đẩy nhẹ khi hover */
+}
+
+.footer-contact p {
+    margin: 0 0 12px 0;
+    line-height: 1.5;
+    font-size: 15px;
+}
+
+.footer-contact strong {
+    color: var(--colorYellow);
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 1px;
+}
+
+.footer-contact a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+/* Mạng xã hội */
+.social-icons {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.social-icons a {
+    width: 36px;
+    height: 36px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.social-icons a:hover {
+    background-color: var(--colorYellow);
+    color: var(--colorPrimary);
+    transform: translateY(-3px);
+}
+
+.copyright {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.scroll-to-top {
+    position: absolute; 
+    top: -25px; 
+    visibility: hidden;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background-color: var(--colorYellow);
+    color: var(--colorPrimary);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    transition: 0.3s;
+    z-index: 10;
+}
+
+.scroll-to-top:hover {
+    background-color: #fff;
+    transform: translateY(-5px);
+}
+
+

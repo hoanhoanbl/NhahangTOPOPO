@@ -1,0 +1,39 @@
+# Ignore các file cấu hình nhạy cảm
+.env
+
+
+# Ignore logs
+*.log
+logs/
+sepay/
+
+# Ignore file docs
+docs/
+think/
+
+# Ignore temporary files
+*.tmp
+*.temp
+
+# Ignore IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ignore OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Test files
+*.test.php
+
+openspec/
+.claude/
+.codex/
+.agent/

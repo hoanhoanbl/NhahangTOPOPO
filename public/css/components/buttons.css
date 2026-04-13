@@ -1,0 +1,19 @@
+.btn-booking {
+    border: 2px solid var(--colorYellow); 
+    color: var(--colorYellow);
+    background-color: transparent;
+    text-decoration: none;
+    padding: 8px 14px;
+    border-radius: 6px; 
+    font-weight: bold;
+    font-size: 14px; 
+    text-transform: uppercase;
+    transition: all 0.3s;
+    display: inline-block;
+}
+
+.btn-booking:hover {
+    background: var(--colorYellow);
+    color: var(--colorPrimary);
+}
+

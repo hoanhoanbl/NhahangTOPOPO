@@ -1,0 +1,135 @@
+# Cấu hình Apache cho hệ thống đặt bàn nhà hàng
+
+# Bật Rewrite Engine
+RewriteEngine On
+
+# Redirect login to login.php
+RewriteRule ^login/?$ login.php [L,QSA]
+
+# Redirect admin to admin dashboard  
+RewriteRule ^admin/?$ index.php?page=admin&action=dashboard [L,QSA]
+
+# Ngăn chặn truy cập trực tiếp vào thư mục config và includes
+RedirectMatch 403 ^/config/.*$
+RedirectMatch 403 ^/includes/.*$
+RedirectMatch 403 ^/database/.*$
+
+# Bảo mật các file nhạy cảm
+<Files ~ "\.(env|log|sql|md)$">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Bảo mật file cấu hình
+<Files "config.php">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Bảo vệ khỏi hotlinking hình ảnh
+RewriteCond %{REQUEST_URI} \.(jpg|jpeg|png|gif|webp)$ [NC]
+RewriteCond %{HTTP_REFERER} !^$ [NC]
+RewriteCond %{HTTP_REFERER} !^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?/ [NC]
+RewriteCond %{HTTP_REFERER} !^https?://(www\.)?yourdomain\.com/ [NC]
+RewriteRule . - [F,L]
+
+# Nén file để tối ưu tốc độ
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+</IfModule>
+
+# Thiết lập cache cho static files
+<IfModule mod_expires.c>
+    ExpiresActive on
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/ico "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+</IfModule>
+
+# Thiết lập security headers
+<IfModule mod_headers.c>
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://code.jquery.com https://cdnjs.cloudflare.com https://uicdn.toast.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://uicdn.toast.com; font-src 'self' https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://cdn.jsdelivr.net https://code.jquery.com https://cdnjs.cloudflare.com https://uicdn.toast.com;"
+</IfModule>
+
+# URL Rewriting cho SEO friendly URLs
+# Trang chủ
+RewriteRule ^$ index.php [L]
+
+# Trang đặt bàn
+RewriteRule ^dat-ban/?$ index.php?page=booking [L,QSA]
+RewriteRule ^dat-ban/([^/]+)/?$ index.php?page=booking&action=$1 [L,QSA]
+
+# Thực đơn
+RewriteRule ^thuc-don/?$ index.php?page=menu [L,QSA]
+RewriteRule ^thuc-don/danh-muc/([0-9]+)/?$ index.php?page=menu&action=category&id=$1 [L,QSA]
+RewriteRule ^thuc-don/mon-an/([0-9]+)/?$ index.php?page=menu&action=dish&id=$1 [L,QSA]
+RewriteRule ^thuc-don/tim-kiem/?$ index.php?page=menu&action=search [L,QSA]
+
+# Đăng nhập/Đăng ký
+RewriteRule ^dang-nhap/?$ index.php?page=auth&action=login [L,QSA]
+RewriteRule ^dang-ky/?$ index.php?page=auth&action=register [L,QSA]
+RewriteRule ^dang-xuat/?$ index.php?page=auth&action=logout [L,QSA]
+RewriteRule ^thong-tin-ca-nhan/?$ index.php?page=auth&action=profile [L,QSA]
+
+# Liên hệ
+RewriteRule ^lien-he/?$ index.php?page=contact [L,QSA]
+
+# Giới thiệu
+RewriteRule ^gioi-thieu/?$ index.php?page=home&action=about [L,QSA]
+
+# Admin panel
+RewriteRule ^admin/?$ admin/index.php [L,QSA]
+RewriteRule ^admin/([^/]+)/?$ admin/index.php?page=$1 [L,QSA]
+RewriteRule ^admin/([^/]+)/([^/]+)/?$ admin/index.php?page=$1&action=$2 [L,QSA]
+
+# API endpoints
+RewriteRule ^api/([^/]+)/?$ api.php?endpoint=$1 [L,QSA]
+RewriteRule ^api/([^/]+)/([^/]+)/?$ api.php?endpoint=$1&action=$2 [L,QSA]
+
+# Error pages
+ErrorDocument 404 /404.php
+ErrorDocument 500 /500.php
+
+# Redirect từ www sang non-www (tùy chọn)
+# RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
+# RewriteRule ^(.*)$ http://%1/$1 [R=301,L]
+
+# Force HTTPS (chỉ bỏ comment khi có SSL)
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Thiết lập múi giờ
+SetEnv TZ Asia/Ho_Chi_Minh
+
+# Tăng giới hạn upload
+php_value upload_max_filesize 10M
+php_value post_max_size 10M
+php_value max_execution_time 300
+php_value max_input_vars 3000
+
+# Thiết lập charset mặc định
+AddDefaultCharset UTF-8
+
+# MIME types
+AddType application/font-woff2 .woff2
+AddType application/font-woff .woff
+AddType application/vnd.ms-fontobject .eot
+AddType font/truetype .ttf
+AddType font/opentype .otf
