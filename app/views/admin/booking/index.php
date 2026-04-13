@@ -9,14 +9,14 @@ $authBranch = adminAuth();
 $isGlobalAdmin = $authBranch->isAdmin();
 $sessionBranchId = $authBranch->getCurrentBranchId();
 if (!$isGlobalAdmin && $sessionBranchId <= 0) {
-    adminDenyAndRedirect('?page=admin&section=booking', 'Khong tim thay co so duoc phan quyen cho tai khoan nay.');
+    adminDenyAndRedirect('?page=admin&section=booking', 'Không tìm thấy cơ sở được phân quyền cho tài khoản này.');
 }
 
 // ============================================================
 // AJAX: Create new booking
 // ============================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'create_booking') {
-    header('Content-Type: application/json');
+    header('Content-Type: application/json; charset=UTF-8');
 
     $requestedMaCoSo = isset($_POST['maCoSo']) ? (int)$_POST['maCoSo'] : 0;
     $maCoSo = $authBranch->resolveScopedBranchId($requestedMaCoSo);
@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 
     if (!$isGlobalAdmin && $requestedMaCoSo > 0 && $requestedMaCoSo !== $sessionBranchId) {
-        $authBranch->denyBranchAccess('Ban khong duoc tao don dat cho co so khac.');
+        $authBranch->denyBranchAccess('Bạn không được tạo đơn đặt cho cơ sở khác.');
         echo json_encode(['success' => false, 'message' => 'Khong duoc tao booking cho co so khac.']);
         exit;
     }
@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $tableRow = mysqli_fetch_assoc($resTable);
         mysqli_stmt_close($stmtTable);
         if (!$tableRow) {
-            throw new Exception('Ban khong thuoc co so hop le.');
+            throw new Exception('Bàn không thuộc cơ sở hợp lệ.');
         }
 
         // Build full datetime
@@ -106,6 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         echo json_encode(['success' => true, 'message' => 'Tao don dat ban thanh cong!', 'maDon' => $maDon]);
     } catch (Throwable $e) {
         mysqli_rollback($conn);
+        error_log('[BOOKING][CREATE] ' . $e->getMessage());
         echo json_encode(['success' => false, 'message' => 'Loi khi tao don dat ban.']);
     }
     exit;
@@ -127,7 +128,7 @@ if (!$isGlobalAdmin) {
 $requestedBranch = isset($_GET['maCoSo']) ? (int)$_GET['maCoSo'] : 0;
 $maCoSoHienTai = $authBranch->resolveScopedBranchId($requestedBranch > 0 ? $requestedBranch : (isset($listCoSo[0]) ? (int)$listCoSo[0]['MaCoSo'] : 0));
 if (!$isGlobalAdmin && $requestedBranch > 0 && $requestedBranch !== $sessionBranchId) {
-    adminDenyAndRedirect('?page=admin&section=booking', 'Ban khong duoc xem booking cua co so khac.');
+    adminDenyAndRedirect('?page=admin&section=booking', 'Bạn không được xem booking của cơ sở khác.');
 }
 
 // Tables for the selected branch
@@ -208,11 +209,22 @@ if ($maCoSoHienTai > 0) {
     }
     /* Calendar container */
     #calendar-container {
-        min-height: 600px;
-        overflow-x: auto;
+        height: 680px;
+        min-height: 680px;
+        overflow: hidden;
         background: #fff;
         border-radius: 8px;
         border: 1px solid #dee2e6;
+    }
+    #calendar-container > div,
+    #calendar-container .toastui-calendar-layout {
+        height: 100% !important;
+    }
+    @media (max-width: 991.98px) {
+        #calendar-container {
+            height: 560px;
+            min-height: 560px;
+        }
     }
     /* Toast UI Calendar overrides for Vietnamese */
     .toastui-calendar-weekday-schedule-list {
@@ -249,7 +261,8 @@ if ($maCoSoHienTai > 0) {
     }
     /* Sidebar collapse compatibility */
     .main-content.collapsed #calendar-container {
-        min-height: 500px;
+        height: 620px;
+        min-height: 620px;
     }
 </style>
 
@@ -285,8 +298,7 @@ if ($maCoSoHienTai > 0) {
 
             <!-- Add Booking Button -->
             <div class="mb-3 text-end">
-                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addBookingModal"
-                    onclick="resetBookingForm()">
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addBookingModal">
                     <i class="fas fa-plus"></i> Thêm đơn đặt bàn
                 </button>
             </div>
@@ -297,8 +309,8 @@ if ($maCoSoHienTai > 0) {
                 <button class="btn btn-outline-secondary" id="btnToday">Hôm nay</button>
                 <button class="btn btn-outline-secondary" id="btnNext"><i class="fas fa-chevron-right"></i></button>
                 <div class="vr"></div>
-                <button class="btn btn-outline-primary" id="btnDay">Ngày</button>
-                <button class="btn btn-primary" id="btnWeek">Tuần</button>
+                <button class="btn btn-primary active" id="btnDay">Ngày</button>
+                <button class="btn btn-outline-primary" id="btnWeek">Tuần</button>
                 <button class="btn btn-outline-primary" id="btnMonth">Tháng</button>
             </div>
 
@@ -374,19 +386,64 @@ if ($maCoSoHienTai > 0) {
     </div>
 </div>
 
+
+<!-- ============================================================ -->
+<!-- Booking Detail Modal -->
+<!-- ============================================================ -->
+<div class="modal fade" id="bookingDetailModal" tabindex="-1" aria-labelledby="bookingDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: var(--colorPrimary); color: white;">
+                <h5 class="modal-title" id="bookingDetailModalLabel"><i class="fas fa-calendar-check me-2"></i>Chi tiết đặt bàn</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Mã đơn</dt>
+                    <dd class="col-sm-8" id="detailBookingCode">-</dd>
+
+                    <dt class="col-sm-4">Bàn</dt>
+                    <dd class="col-sm-8" id="detailBookingTable">-</dd>
+
+                    <dt class="col-sm-4">Thời gian</dt>
+                    <dd class="col-sm-8" id="detailBookingTime">-</dd>
+
+                    <dt class="col-sm-4">Khách hàng</dt>
+                    <dd class="col-sm-8" id="detailBookingCustomer">-</dd>
+
+                    <dt class="col-sm-4">Số điện thoại</dt>
+                    <dd class="col-sm-8" id="detailBookingPhone">-</dd>
+
+                    <dt class="col-sm-4">Số khách</dt>
+                    <dd class="col-sm-8" id="detailBookingGuests">-</dd>
+
+                    <dt class="col-sm-4">Trạng thái</dt>
+                    <dd class="col-sm-8" id="detailBookingStatus">-</dd>
+
+                    <dt class="col-sm-4">Ghi chú</dt>
+                    <dd class="col-sm-8 mb-0" id="detailBookingNote">Không có</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Toast UI Calendar JS -->
 <script src="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.js"></script>
 <script>
 (function() {
     'use strict';
-
     // ============================================================
-    // Build calendar resources (tables) from PHP
+    // Build calendars (tables) from PHP
     // ============================================================
-    const calendarResources = <?= json_encode(array_map(function($t) {
+    const calendarTables = <?= json_encode(array_map(function($t) {
         return [
             'id'   => (string)$t['MaBan'],
-            'name' => htmlspecialchars($t['TenBan']) . ' (' . $t['SucChua'] . ' người)'
+            'name' => htmlspecialchars($t['TenBan']) . ' (' . $t['SucChua'] . ' người)',
+            'backgroundColor' => '#1B4E30',
+            'dragBackgroundColor' => '#1B4E30',
+            'borderColor' => '#163f27',
+            'color' => '#ffffff'
         ];
     }, $tables)) ?>;
 
@@ -415,18 +472,20 @@ if ($maCoSoHienTai > 0) {
             return [
                 'id'           => (string)$b['MaDon'],
                 'calendarId'   => (string)$b['MaBan'],
-                'title'        => "#{$maDon} - {$tenKH} - {$soKH} khách",
-                'body'         => "{$ghiChu}",
-                'start'        => $b['ThoiGianBatDau'],
-                'end'          => null ?: date('Y-m-d H:i:s', strtotime($b['ThoiGianBatDau'] . ' +2 hours')),
+                'title'        => "#{$maDon} - " . ($b['TenBan'] ?? ''),
+                'body'         => "{$tenKH} - {$soKH} khách",
+                'start'        => date('Y-m-d\\TH:i:s', strtotime($b['ThoiGianBatDau'])),
+                'end'          => date('Y-m-d\\TH:i:s', strtotime($b['ThoiGianBatDau'] . ' +2 hours')), 
                 'category'     => 'time',
                 'isPending'    => ($status === 'cho_xac_nhan'),
                 'isFocused'    => false,
                 'isVisible'   => true,
                 'isReadOnly'   => true,
                 'customClass'  => $cls,
-                'bgColor'      => $bg,
+                'backgroundColor' => $bg,
+                'dragBackgroundColor' => $bg,
                 'borderColor'  => 'transparent',
+                'color'        => '#212529',
                 'raw'          => [
                     'maDon'  => $maDon,
                     'tenKH'  => $tenKH,
@@ -434,8 +493,10 @@ if ($maCoSoHienTai > 0) {
                     'soKH'   => $soKH,
                     'gio'    => $gioBD,
                     'trangThai' => $status,
+                    'trangThaiLabel' => $status === 'da_xac_nhan' ? 'Đã xác nhận' : ($status === 'cho_xac_nhan' ? 'Chờ xác nhận' : 'Khác'),
                     'ghiChu' => $ghiChu,
                     'tenBan' => $b['TenBan'] ?? '',
+                    'ngayGio' => date('d/m/Y H:i', strtotime($b['ThoiGianBatDau'])),
                 ]
             ];
         }, $bookings)) ?>;
@@ -465,20 +526,23 @@ if ($maCoSoHienTai > 0) {
             abbreviationsDaynames: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
         }
     };
-
     // ============================================================
     // Initialize Calendar
     // ============================================================
     const calendar = new tui.Calendar(document.getElementById('calendar-container'), {
-        defaultView: 'week',
+        defaultView: 'day',
         useCreationPopup: false,
-        useDetailPopup: true,
+        useDetailPopup: false,
         isReadOnly: true,
         usageStatistics: false,
-        calendars: [],
-        resources: calendarResources,
-        events: allEvents,
+        calendars: calendarTables,
         i18n: vnI18n['en'],
+        week: {
+            hourStart: 6,
+            hourEnd: 24,
+            eventView: ['time'],
+            taskView: false
+        },
         theme: {
             'week.timegridOneHour.height': '60px',
             'week.timegridLeft.width': '120px',
@@ -488,6 +552,20 @@ if ($maCoSoHienTai > 0) {
             'week.weekend.backgroundColor': '#fafafa'
         }
     });
+
+    if (allEvents.length > 0) {
+        calendar.createEvents(allEvents);
+    }
+
+    function renderCalendarLayout() {
+        window.requestAnimationFrame(function() {
+            calendar.render();
+        });
+    }
+
+    renderCalendarLayout();
+    window.addEventListener('load', renderCalendarLayout);
+    window.addEventListener('resize', renderCalendarLayout);
 
     // ============================================================
     // View toggle buttons
@@ -534,11 +612,21 @@ if ($maCoSoHienTai > 0) {
     // ============================================================
     calendar.on('clickEvent', function(calendarEvent) {
         const raw = calendarEvent.event.raw || {};
-        const title = 'Đơn #' + (raw.maDon || '?') + ' - ' + (raw.tenKH || '?') + ' - ' + (raw.soKH || '?') + ' khách';
-        const time  = 'Giờ: ' + (raw.gio || '?');
-        const table = 'Bàn: ' + (raw.tenBan || '?');
-        const note  = raw.ghiChu ? '\nGhi chú: ' + raw.ghiChu : '';
-        alert(title + '\n' + time + '\n' + table + note);
+
+        if (!bookingDetailModal) {
+            return;
+        }
+
+        document.getElementById('detailBookingCode').textContent = raw.maDon ? '#' + raw.maDon : '-';
+        document.getElementById('detailBookingTable').textContent = raw.tenBan || '-';
+        document.getElementById('detailBookingTime').textContent = raw.ngayGio || '-';
+        document.getElementById('detailBookingCustomer').textContent = raw.tenKH || '-';
+        document.getElementById('detailBookingPhone').textContent = raw.sdt || '-';
+        document.getElementById('detailBookingGuests').textContent = raw.soKH ? (raw.soKH + ' khách') : '-';
+        document.getElementById('detailBookingStatus').textContent = raw.trangThaiLabel || raw.trangThai || '-';
+        document.getElementById('detailBookingNote').textContent = raw.ghiChu || 'Không có';
+
+        bookingDetailModal.show();
     });
 
     // ============================================================
@@ -548,6 +636,9 @@ if ($maCoSoHienTai > 0) {
     const formError     = document.getElementById('formError');
     const formSuccess   = document.getElementById('formSuccess');
     const btnSaveBooking = document.getElementById('btnSaveBooking');
+    const addBookingModal = document.getElementById('addBookingModal');
+    const bookingDetailModalEl = document.getElementById('bookingDetailModal');
+    const bookingDetailModal = bookingDetailModalEl ? new bootstrap.Modal(bookingDetailModalEl) : null;
 
     bookingForm.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -569,7 +660,23 @@ if ($maCoSoHienTai > 0) {
             method: 'POST',
             body: formData
         })
-        .then(function(response) { return response.json(); })
+        .then(function(response) {
+            return response.text().then(function(text) {
+                let data = null;
+
+                try {
+                    data = JSON.parse(text);
+                } catch (error) {
+                    throw new Error('INVALID_JSON_RESPONSE');
+                }
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'REQUEST_FAILED');
+                }
+
+                return data;
+            });
+        })
         .then(function(data) {
             if (data.success) {
                 formSuccess.textContent = data.message;
@@ -590,8 +697,10 @@ if ($maCoSoHienTai > 0) {
                 btnSaveBooking.innerHTML = '<i class="fas fa-save"></i> Lưu đặt bàn';
             }
         })
-        .catch(function() {
-            formError.textContent = 'Đã xảy ra lỗi khi gửi yêu cầu.';
+        .catch(function(error) {
+            formError.textContent = error && error.message && error.message !== 'INVALID_JSON_RESPONSE'
+                ? error.message
+                : 'Phan hoi may chu khong hop le. Vui long thu lai.';
             formError.classList.remove('d-none');
             btnSaveBooking.disabled = false;
             btnSaveBooking.innerHTML = '<i class="fas fa-save"></i> Lưu đặt bàn';
@@ -607,6 +716,10 @@ if ($maCoSoHienTai > 0) {
         document.getElementById('formMaCoSo').value = <?= $maCoSoHienTai ?>;
         document.getElementById('formNgayDat').value = '<?= date('Y-m-d') ?>';
         document.getElementById('formGioBatDau').value = '18:00';
+    }
+
+    if (addBookingModal) {
+        addBookingModal.addEventListener('show.bs.modal', resetBookingForm);
     }
 
     // ============================================================
@@ -627,9 +740,6 @@ if ($maCoSoHienTai > 0) {
 
 })();
 </script>
-
-
-
 
 
 
