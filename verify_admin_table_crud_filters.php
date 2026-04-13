@@ -16,7 +16,7 @@ try {
     // Create
     $insert = mysqli_prepare($conn, "INSERT INTO ban (MaBanCode, MaCoSo, TenBan, ZoneBan, SucChua, SucChuaToiDa, OnlineBookable, GhepBanDuoc, TrangThai, GhiChu) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     $code = 'SPX-CRUD-01';
-    $name = 'SPX Bàn 01';
+    $name = 'SPX BÃ n 01';
     $zone = 'SPX-Z1';
     $s1 = 4; $s2 = 6; $online = 1; $merge = 1; $status = 'Active'; $note = 'ghi chu';
     mysqli_stmt_bind_param($insert, 'sissiiiiss', $code, $branchId, $name, $zone, $s1, $s2, $online, $merge, $status, $note);
@@ -51,10 +51,10 @@ try {
 
     // Filter/search composable + pagination
     $extraInsert = mysqli_prepare($conn, "INSERT INTO ban (MaBanCode, MaCoSo, TenBan, ZoneBan, SucChua, SucChuaToiDa, OnlineBookable, GhepBanDuoc, TrangThai, GhiChu) VALUES (?, ?, ?, ?, 2, 2, 1, 1, 'Active', '')");
-    $codeA='SPX-FLT-A'; $nameA='Bàn Alpha'; $zoneA='SPX-Z2';
+    $codeA='SPX-FLT-A'; $nameA='BÃ n Alpha'; $zoneA='SPX-Z2';
     mysqli_stmt_bind_param($extraInsert, 'siss', $codeA, $branchId, $nameA, $zoneA);
     mysqli_stmt_execute($extraInsert);
-    $codeB='SPX-FLT-B'; $nameB='Bàn Beta'; $zoneB='SPX-Z9';
+    $codeB='SPX-FLT-B'; $nameB='BÃ n Beta'; $zoneB='SPX-Z9';
     mysqli_stmt_bind_param($extraInsert, 'siss', $codeB, $branchId, $nameB, $zoneB);
     mysqli_stmt_execute($extraInsert);
     mysqli_stmt_close($extraInsert);

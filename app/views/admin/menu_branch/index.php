@@ -46,16 +46,16 @@ if ($selected_branch_id <= 0 && !$isGlobalAdmin) {
 
 <div class="container-fluid">
     <div class="card shadow p-4">
-        <h3 class="mb-4">Qu?n l� Menu theo Co s?</h3>
+        <h3 class="mb-4">Quản lý Menu theo Cơ sở</h3>
 
         <form action="" method="GET">
             <input type="hidden" name="page" value="admin">
             <input type="hidden" name="section" value="menu_branch">
             <div class="row g-3 align-items-end mb-4">
                 <div class="col-md-4">
-                    <label for="branch_id" class="form-label"><strong>Ch?n m?t co s? d? qu?n l�:</strong></label>
+                    <label for="branch_id" class="form-label"><strong>Chọn một cơ sở để quản lý:</strong></label>
                     <select class="form-select" id="branch_id" name="branch_id" onchange="this.form.submit()" <?php echo $isGlobalAdmin ? '' : 'disabled'; ?>>
-                        <option value="">-- Vui l�ng ch?n co s? --</option>
+                        <option value="">-- Vui lòng chọn cơ sở --</option>
                         <?php foreach ($branches as $branch) : ?>
                             <option value="<?php echo (int)$branch['MaCoSo']; ?>" <?php echo ((int)$selected_branch_id === (int)$branch['MaCoSo']) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($branch['TenCoSo']); ?>
@@ -77,7 +77,7 @@ if ($selected_branch_id <= 0 && !$isGlobalAdmin) {
         } else {
             echo '<div class="alert alert-info text-center" role="alert">';
             echo '  <i class="fas fa-info-circle fa-2x mb-3"></i><br>';
-            echo '  Vui l�ng ch?n m?t co s? t? danh s�ch ? tr�n d? xem v� qu?n l� th?c don chi ti?t.';
+            echo '  Vui lòng chọn một cơ sở từ danh sách ở trên để xem và quản lý thực đơn chi tiết.';
             echo '</div>';
         }
         ?>

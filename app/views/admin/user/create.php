@@ -10,16 +10,16 @@ $isAdminRole = isset($auth) ? $auth->isAdmin() : false;
     <div class="modal-content">
       <div class="modal-header bg-success text-white">
         <h5 class="modal-title" id="addUserModalLabel">
-          <i class="fas fa-user-plus"></i> Th�m Nh�n Vi�n M?i
+          <i class="fas fa-user-plus"></i> Thêm Nhân Viên Mới
         </h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <form id="addUserForm" action="?page=admin&section=users&action=process-create" method="POST">
           <div class="form-group mb-3">
-            <label for="MaCoSo">Co S?</label>
+            <label for="MaCoSo">Cơ Sở</label>
             <select class="form-control" id="MaCoSo" name="MaCoSo" <?php echo $isAdminRole ? '' : 'required disabled'; ?>>
-              <option value="">-- Ch?n Co S? --</option>
+              <option value="">-- Chọn Cơ Sở --</option>
               <?php while ($coso = mysqli_fetch_assoc($result_coso)): ?>
                 <option value="<?php echo (int)$coso['MaCoSo']; ?>" <?php echo ($currentBranchId === (int)$coso['MaCoSo']) ? 'selected' : ''; ?>>
                   <?php echo htmlspecialchars($coso['TenCoSo']); ?>
@@ -29,51 +29,51 @@ $isAdminRole = isset($auth) ? $auth->isAdmin() : false;
             <?php if (!$isAdminRole): ?>
               <input type="hidden" name="MaCoSo" value="<?php echo $currentBranchId; ?>">
             <?php endif; ?>
-            <small class="text-muted">Admin c� th? d? tr?ng co s? khi t?o t�i kho?n admin; qu?n l�/l? t�n b?t bu?c 1 co s?.</small>
+            <small class="text-muted">Admin có thể để trống cơ sở khi tạo tài khoản admin; quản lý/lễ tân bắt buộc 1 cơ sở.</small>
           </div>
 
           <div class="form-group mb-3">
-            <label for="TenNhanVien">T�n Nh�n Vi�n</label>
+            <label for="TenNhanVien">Tên Nhân Viên</label>
             <input type="text" class="form-control" id="TenNhanVien" name="TenNhanVien" required>
           </div>
 
           <div class="form-group mb-3">
-            <label for="TenDN">T�n �ang Nh?p</label>
+            <label for="TenDN">Tên Đăng Nhập</label>
             <input type="text" class="form-control" id="TenDN" name="TenDN" required>
-            <small class="text-muted">T�n dang nh?p ph?i l� duy nh?t trong h? th?ng.</small>
+            <small class="text-muted">Tên đăng nhập phải là duy nhất trong hệ thống.</small>
           </div>
 
           <div class="form-group mb-3">
-            <label for="MatKhau">M?t Kh?u</label>
+            <label for="MatKhau">Mật Khẩu</label>
             <input type="password" class="form-control" id="MatKhau" name="MatKhau" required>
           </div>
 
           <div class="form-group mb-3">
-            <label for="XacNhanMatKhau">X�c Nh?n M?t Kh?u</label>
+            <label for="XacNhanMatKhau">Xác Nhận Mật Khẩu</label>
             <input type="password" class="form-control" id="XacNhanMatKhau" name="XacNhanMatKhau" required>
           </div>
 
           <div class="form-group mb-3">
-            <label>Ch?c V?</label>
+            <label>Chức Vụ</label>
             <div class="form-check">
               <input class="form-check-input" type="radio" name="ChucVu" id="ChucVuReceptionist" value="receptionist" checked>
-              <label class="form-check-label" for="ChucVuReceptionist">L? T�n</label>
+              <label class="form-check-label" for="ChucVuReceptionist">Lễ Tân</label>
             </div>
             <div class="form-check">
               <input class="form-check-input" type="radio" name="ChucVu" id="ChucVuManager" value="manager">
-              <label class="form-check-label" for="ChucVuManager">Qu?n L�</label>
+              <label class="form-check-label" for="ChucVuManager">Quản Lý</label>
             </div>
             <div class="form-check">
               <input class="form-check-input" type="radio" name="ChucVu" id="ChucVuAdmin" value="admin">
-              <label class="form-check-label" for="ChucVuAdmin">Qu?n Tr? Vi�n</label>
+              <label class="form-check-label" for="ChucVuAdmin">Quản Trị Viên</label>
             </div>
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times"></i> H?y</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times"></i> Hủy</button>
         <button type="submit" form="addUserForm" class="btn" style="background-color: #21A256; border-color: #21A256; color: white;">
-          <i class="fas fa-save"></i> Th�m Nh�n Vi�n
+          <i class="fas fa-save"></i> Thêm Nhân Viên
         </button>
       </div>
     </div>
@@ -86,7 +86,7 @@ document.getElementById('addUserForm').addEventListener('submit', function(e) {
     const confirmPassword = document.getElementById('XacNhanMatKhau').value;
     if (password !== confirmPassword) {
         e.preventDefault();
-        alert('M?t kh?u v� x�c nh?n m?t kh?u kh�ng kh?p!');
+        alert('Mật khẩu và xác nhận mật khẩu không khớp!');
     }
 });
 

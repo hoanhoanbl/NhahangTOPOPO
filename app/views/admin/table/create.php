@@ -13,16 +13,16 @@ $currentBranchId = isset($_SESSION['user']['MaCoSo']) ? (int)$_SESSION['user']['
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header bg-success text-white">
-        <h5 class="modal-title"><i class="fas fa-utensils me-2"></i> ThÍm b‡n m?i</h5>
+        <h5 class="modal-title"><i class="fas fa-utensils me-2"></i> Th√™m b√†n m·ªõi</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <form action="?page=admin&section=table&action=process-create" method="POST">
         <div class="modal-body">
           <div class="row g-3">
             <div class="col-md-6">
-              <label class="form-label" for="MaCoSo">Co s?</label>
+              <label class="form-label" for="MaCoSo">C∆° s·ªü</label>
               <select class="form-select" id="MaCoSo" name="MaCoSo" required <?php echo $isGlobalAdmin ? '' : 'disabled'; ?>>
-                <option value="">-- Ch?n co s? --</option>
+                <option value="">-- Ch·ªçn c∆° s·ªü --</option>
                 <?php foreach ($list_coso as $coso): ?>
                   <option value="<?php echo (int)$coso['MaCoSo']; ?>" <?php echo ($currentBranchId === (int)$coso['MaCoSo']) ? 'selected' : ''; ?>>
                     <?php echo htmlspecialchars($coso['TenCoSo']); ?>
@@ -35,48 +35,48 @@ $currentBranchId = isset($_SESSION['user']['MaCoSo']) ? (int)$_SESSION['user']['
             </div>
 
             <div class="col-md-6">
-              <label class="form-label" for="MaBanCode">M„ b‡n</label>
+              <label class="form-label" for="MaBanCode">M√£ b√†n</label>
               <input type="text" class="form-control" id="MaBanCode" name="MaBanCode" placeholder="VD: TBL-0201" required>
             </div>
 
             <div class="col-md-6">
-              <label class="form-label" for="TenBan">TÍn b‡n</label>
-              <input type="text" class="form-control" id="TenBan" name="TenBan" placeholder="VD: B‡n A01" required>
+              <label class="form-label" for="TenBan">T√™n b√†n</label>
+              <input type="text" class="form-control" id="TenBan" name="TenBan" placeholder="VD: B√†n A01" required>
             </div>
 
             <div class="col-md-6">
-              <label class="form-label" for="ZoneBan">Zone b‡n</label>
-              <input type="text" class="form-control" id="ZoneBan" name="ZoneBan" placeholder="VD: T?ng 1 - Trong nh‡" required>
+              <label class="form-label" for="ZoneBan">Khu v·ª±c b√†n</label>
+              <input type="text" class="form-control" id="ZoneBan" name="ZoneBan" placeholder="VD: T·∫ßng 1 - Trong nh√†" required>
             </div>
 
             <div class="col-md-6">
-              <label class="form-label" for="SucChua">S?c ch?a</label>
+              <label class="form-label" for="SucChua">S·ª©c ch·ª©a</label>
               <input type="number" class="form-control" id="SucChua" name="SucChua" min="1" max="100" required>
             </div>
 
             <div class="col-md-6">
-              <label class="form-label" for="SucChuaToiDa">S?c ch?a t?i da</label>
+              <label class="form-label" for="SucChuaToiDa">S·ª©c ch·ª©a t·ªëi ƒëa</label>
               <input type="number" class="form-control" id="SucChuaToiDa" name="SucChuaToiDa" min="1" max="100" required>
             </div>
 
             <div class="col-md-4">
-              <label class="form-label" for="OnlineBookable">–?t online</label>
+              <label class="form-label" for="OnlineBookable">ƒê·∫∑t online</label>
               <select class="form-select" id="OnlineBookable" name="OnlineBookable" required>
-                <option value="1" selected>CÛ</option>
-                <option value="0">KhÙng</option>
+                <option value="1" selected>C√≥</option>
+                <option value="0">Kh√¥ng</option>
               </select>
             </div>
 
             <div class="col-md-4">
-              <label class="form-label" for="GhepBanDuoc">Cho phÈp ghÈp</label>
+              <label class="form-label" for="GhepBanDuoc">Cho ph√©p gh√©p</label>
               <select class="form-select" id="GhepBanDuoc" name="GhepBanDuoc" required>
-                <option value="1" selected>CÛ</option>
-                <option value="0">KhÙng</option>
+                <option value="1" selected>C√≥</option>
+                <option value="0">Kh√¥ng</option>
               </select>
             </div>
 
             <div class="col-md-4">
-              <label class="form-label" for="TrangThai">Tr?ng th·i</label>
+              <label class="form-label" for="TrangThai">Tr·∫°ng th√°i</label>
               <select class="form-select" id="TrangThai" name="TrangThai" required>
                 <option value="Active" selected>Active</option>
                 <option value="Inactive">Inactive</option>
@@ -84,15 +84,15 @@ $currentBranchId = isset($_SESSION['user']['MaCoSo']) ? (int)$_SESSION['user']['
             </div>
 
             <div class="col-md-12">
-              <label class="form-label" for="GhiChu">Ghi ch˙</label>
-              <textarea class="form-control" id="GhiChu" name="GhiChu" rows="2" placeholder="Ghi ch˙ thÍm (n?u cÛ)"></textarea>
+              <label class="form-label" for="GhiChu">Ghi ch√∫</label>
+              <textarea class="form-control" id="GhiChu" name="GhiChu" rows="2" placeholder="Ghi ch√∫ th√™m (n·∫øu c√≥)"></textarea>
             </div>
           </div>
         </div>
 
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times"></i> H?y</button>
-          <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> ThÍm b‡n</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times"></i> H·ªßy</button>
+          <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Th√™m b√†n</button>
         </div>
       </form>
     </div>
