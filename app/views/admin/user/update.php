@@ -7,16 +7,16 @@ $isAdminRole = isset($auth) ? $auth->isAdmin() : false;
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header bg-warning text-dark">
-        <h5 class="modal-title"><i class="fas fa-user-edit"></i> S?a Th�ng Tin Nh�n Vi�n</h5>
+        <h5 class="modal-title"><i class="fas fa-user-edit"></i> Sửa Thông Tin Nhân Viên</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <form id="updateUserForm" method="POST">
       <div class="modal-body">
         <div class="row g-3">
           <div class="col-md-12">
-            <label for="updateMaCoSo">Co S?</label>
+            <label for="updateMaCoSo">Cơ Sở</label>
             <select class="form-control" id="updateMaCoSo" name="MaCoSo" <?php echo $isAdminRole ? '' : 'required disabled'; ?>>
-              <option value="">-- Ch?n Co S? --</option>
+              <option value="">-- Chọn Cơ Sở --</option>
               <?php
               $sql_coso = "SELECT * FROM coso ORDER BY TenCoSo";
               $result_coso = mysqli_query($conn, $sql_coso);
@@ -33,48 +33,48 @@ $isAdminRole = isset($auth) ? $auth->isAdmin() : false;
           </div>
 
           <div class="col-md-6">
-            <label class="form-label">T�n Nh�n Vi�n</label>
+            <label class="form-label">Tên Nhân Viên</label>
             <input type="text" class="form-control" id="updateTenNhanVien" name="TenNhanVien" required>
           </div>
 
           <div class="col-md-6">
-            <label class="form-label">T�n �ang Nh?p</label>
+            <label class="form-label">Tên Đăng Nhập</label>
             <input type="text" class="form-control" id="updateTenDN" name="TenDN" required>
-            <small class="text-muted">T�n dang nh?p ph?i l� duy nh?t trong h? th?ng.</small>
+            <small class="text-muted">Tên đăng nhập phải là duy nhất trong hệ thống.</small>
           </div>
 
           <div class="col-md-6">
-            <label class="form-label">M?t Kh?u M?i</label>
+            <label class="form-label">Mật Khẩu Mới</label>
             <input type="password" class="form-control" id="updateMatKhau" name="MatKhau">
-            <small class="text-muted">�? tr?ng n?u kh�ng mu?n thay d?i m?t kh?u.</small>
+            <small class="text-muted">Để trống nếu không muốn thay đổi mật khẩu.</small>
           </div>
 
           <div class="col-md-6">
-            <label class="form-label">X�c Nh?n M?t Kh?u</label>
+            <label class="form-label">Xác Nhận Mật Khẩu</label>
             <input type="password" class="form-control" id="updateXacNhanMatKhau" name="XacNhanMatKhau">
           </div>
 
           <div class="col-12">
-            <label>Ch?c V?</label>
+            <label>Chức Vụ</label>
             <div class="form-check">
               <input class="form-check-input" type="radio" name="ChucVu" id="updateChucVuReceptionist" value="receptionist">
-              <label class="form-check-label" for="updateChucVuReceptionist">L? T�n</label>
+              <label class="form-check-label" for="updateChucVuReceptionist">Lễ Tân</label>
             </div>
             <div class="form-check">
               <input class="form-check-input" type="radio" name="ChucVu" id="updateChucVuManager" value="manager">
-              <label class="form-check-label" for="updateChucVuManager">Qu?n L�</label>
+              <label class="form-check-label" for="updateChucVuManager">Quản Lý</label>
             </div>
             <div class="form-check">
               <input class="form-check-input" type="radio" name="ChucVu" id="updateChucVuAdmin" value="admin">
-              <label class="form-check-label" for="updateChucVuAdmin">Qu?n Tr? Vi�n</label>
+              <label class="form-check-label" for="updateChucVuAdmin">Quản Trị Viên</label>
             </div>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times"></i> H?y</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times"></i> Hủy</button>
         <button type="submit" class="btn" style="background-color: #FFA827; border-color: #FFA827; color: #333;">
-          <i class="fas fa-save"></i> C?p nh?t nh�n vi�n
+          <i class="fas fa-save"></i> Cập nhật nhân viên
         </button>
       </div>
       </form>
@@ -111,7 +111,7 @@ document.getElementById('updateUserForm').addEventListener('submit', function(e)
     const confirmPassword = document.getElementById('updateXacNhanMatKhau').value;
     if (password !== '' && password !== confirmPassword) {
         e.preventDefault();
-        alert('M?t kh?u v� x�c nh?n m?t kh?u kh�ng kh?p!');
+        alert('Mật khẩu và xác nhận mật khẩu không khớp!');
     }
 });
 
