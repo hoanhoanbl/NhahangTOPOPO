@@ -616,6 +616,3 @@ class TableStatusManager {
 
     
 }
-?>
-
-

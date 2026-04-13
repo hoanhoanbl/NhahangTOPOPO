@@ -23,5 +23,3 @@
     
     // Thiáº¿t láº­p mÃºi giá» cho MySQL connection
     mysqli_query($conn, "SET time_zone = '+07:00'");
-?>
-
