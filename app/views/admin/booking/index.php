@@ -4,6 +4,7 @@ if (session_status() == PHP_SESSION_NONE) {
 }
 include dirname(__DIR__, 4) . "/config/connect.php";
 require_once dirname(__DIR__, 3) . '/models/TableStatusManager.php';
+require_once dirname(__DIR__, 3) . '/models/BookingModel.php';
 require_once dirname(__DIR__) . '/common/branch-auth.php';
 $authBranch = adminAuth();
 $isGlobalAdmin = $authBranch->isAdmin();
@@ -20,98 +21,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     $requestedMaCoSo = isset($_POST['maCoSo']) ? (int)$_POST['maCoSo'] : 0;
     $maCoSo = $authBranch->resolveScopedBranchId($requestedMaCoSo);
-    $maBan      = isset($_POST['maBan'])       ? (int)$_POST['maBan']       : 0;
-    $tenKH      = isset($_POST['tenKH'])       ? trim($_POST['tenKH'])      : '';
-    $sdt        = isset($_POST['sdt'])         ? trim($_POST['sdt'])        : '';
-    $soLuongKH  = isset($_POST['soLuongKH'])  ? (int)$_POST['soLuongKH']   : 0;
-    $ngayDat    = isset($_POST['ngayDat'])     ? trim($_POST['ngayDat'])    : '';
-    $gioBatDau  = isset($_POST['gioBatDau'])   ? trim($_POST['gioBatDau'])  : '';
-    $ghiChu    = isset($_POST['ghiChu'])      ? trim($_POST['ghiChu'])    : '';
+    $maBan = isset($_POST['maBan']) ? (int)$_POST['maBan'] : 0;
+    $tenKH = isset($_POST['tenKH']) ? trim($_POST['tenKH']) : '';
+    $sdt = isset($_POST['sdt']) ? trim($_POST['sdt']) : '';
+    $soLuongKH = isset($_POST['soLuongKH']) ? (int)$_POST['soLuongKH'] : 0;
+    $ngayDat = isset($_POST['ngayDat']) ? trim($_POST['ngayDat']) : '';
+    $gioBatDau = isset($_POST['gioBatDau']) ? trim($_POST['gioBatDau']) : '';
+    $ghiChu = isset($_POST['ghiChu']) ? trim($_POST['ghiChu']) : '';
 
-    // Validate
     if ($maCoSo <= 0 || $maBan <= 0 || $tenKH === '' || $sdt === '' || $soLuongKH <= 0 || $ngayDat === '' || $gioBatDau === '') {
-        echo json_encode(['success' => false, 'message' => 'Vui long dien day du thong tin bat buoc.']);
+        echo json_encode(['success' => false, 'message' => 'Vui lòng điền đầy đủ thông tin bắt buộc.']);
         exit;
     }
 
     if (!$isGlobalAdmin && $requestedMaCoSo > 0 && $requestedMaCoSo !== $sessionBranchId) {
         $authBranch->denyBranchAccess('Bạn không được tạo đơn đặt cho cơ sở khác.');
-        echo json_encode(['success' => false, 'message' => 'Khong duoc tao booking cho co so khac.']);
+        echo json_encode(['success' => false, 'message' => 'Không được tạo booking cho cơ sở khác.']);
         exit;
     }
 
     try {
-        mysqli_begin_transaction($conn);
-
-        // Find or create customer
-        $maKH = 0;
-        $stmtCheck = mysqli_prepare($conn, "SELECT MaKH FROM khachhang WHERE SDT = ? LIMIT 1");
-        mysqli_stmt_bind_param($stmtCheck, "s", $sdt);
-        mysqli_stmt_execute($stmtCheck);
-        $resCheck = mysqli_stmt_get_result($stmtCheck);
-        if ($row = mysqli_fetch_assoc($resCheck)) {
-            $maKH = (int)$row['MaKH'];
-        }
-        mysqli_stmt_close($stmtCheck);
-
-        if ($maKH <= 0) {
-            $stmtInsertCustomer = mysqli_prepare($conn, "INSERT INTO khachhang (TenKH, SDT) VALUES (?, ?)");
-            mysqli_stmt_bind_param($stmtInsertCustomer, "ss", $tenKH, $sdt);
-            if (!mysqli_stmt_execute($stmtInsertCustomer)) {
-                mysqli_stmt_close($stmtInsertCustomer);
-                throw new Exception('Khong the tao khach hang.');
-            }
-            $maKH = (int)mysqli_insert_id($conn);
-            mysqli_stmt_close($stmtInsertCustomer);
-        }
-
-        // Ensure selected table belongs to scoped branch
-        $stmtTable = mysqli_prepare($conn, "SELECT MaBan FROM ban WHERE MaBan = ? AND MaCoSo = ? LIMIT 1");
-        mysqli_stmt_bind_param($stmtTable, "ii", $maBan, $maCoSo);
+        $stmtTable = mysqli_prepare($conn, 'SELECT MaBan FROM ban WHERE MaBan = ? AND MaCoSo = ? LIMIT 1');
+        mysqli_stmt_bind_param($stmtTable, 'ii', $maBan, $maCoSo);
         mysqli_stmt_execute($stmtTable);
         $resTable = mysqli_stmt_get_result($stmtTable);
         $tableRow = mysqli_fetch_assoc($resTable);
         mysqli_stmt_close($stmtTable);
+
         if (!$tableRow) {
             throw new Exception('Bàn không thuộc cơ sở hợp lệ.');
         }
 
-        // Build full datetime
-        $thoiGianBatDau = $ngayDat . ' ' . $gioBatDau . ':00';
+        $currentUser = $_SESSION['user'] ?? [];
+        $bookingModel = new BookingModel($conn);
+        $maDon = $bookingModel->createBookingRecord([
+            'tenKH' => $tenKH,
+            'sdt' => $sdt,
+            'maCoSo' => $maCoSo,
+            'soLuongKH' => $soLuongKH,
+            'thoiGianBatDau' => $ngayDat . ' ' . $gioBatDau . ':00',
+            'ghiChu' => $ghiChu,
+            'status' => 'cho_xac_nhan',
+            'selectedTables' => [$maBan],
+            'actor_type' => 'staff',
+            'actor_id' => $currentUser['MaNV'] ?? null,
+            'actor_name' => $currentUser['TenNhanVien'] ?? ($currentUser['HoTen'] ?? ($currentUser['TenDangNhap'] ?? 'Admin')),
+            'source' => 'admin_booking_calendar',
+        ]);
 
-        // Insert booking
-        $stmtInsertBooking = mysqli_prepare($conn, "INSERT INTO dondatban (MaKH, MaCoSo, SoLuongKH, ThoiGianBatDau, TrangThai, GhiChu) VALUES (?, ?, ?, ?, 'cho_xac_nhan', ?)");
-        mysqli_stmt_bind_param($stmtInsertBooking, "iiiss", $maKH, $maCoSo, $soLuongKH, $thoiGianBatDau, $ghiChu);
-        if (!mysqli_stmt_execute($stmtInsertBooking)) {
-            mysqli_stmt_close($stmtInsertBooking);
-            throw new Exception('Khong the tao don dat ban.');
+        if (!$maDon) {
+            throw new Exception($bookingModel->getLastError() ?: 'Không thể tạo đơn đặt bàn.');
         }
-        $maDon = (int)mysqli_insert_id($conn);
-        mysqli_stmt_close($stmtInsertBooking);
 
-        if ($maDon <= 0) {
-            throw new Exception('Khong the tao don dat ban.');
-        }
-
-        // Link table
-        $stmtLink = mysqli_prepare($conn, "INSERT INTO dondatban_ban (MaDon, MaBan) VALUES (?, ?)");
-        mysqli_stmt_bind_param($stmtLink, "ii", $maDon, $maBan);
-        if (!mysqli_stmt_execute($stmtLink)) {
-            mysqli_stmt_close($stmtLink);
-            throw new Exception('Khong the gan ban cho don dat ban.');
-        }
-        mysqli_stmt_close($stmtLink);
-
-        mysqli_commit($conn);
-        echo json_encode(['success' => true, 'message' => 'Tao don dat ban thanh cong!', 'maDon' => $maDon]);
+        echo json_encode(['success' => true, 'message' => 'Tạo đơn đặt bàn thành công!', 'maDon' => $maDon]);
     } catch (Throwable $e) {
-        mysqli_rollback($conn);
         error_log('[BOOKING][CREATE] ' . $e->getMessage());
-        echo json_encode(['success' => false, 'message' => 'Loi khi tao don dat ban.']);
+        echo json_encode(['success' => false, 'message' => ($e->getMessage() ?: 'Lỗi khi tạo đơn đặt bàn.')]);
     }
     exit;
 }
 
+// ============================================================
+// Page Load: fetch branches, tables, bookings
+// ============================================================
 // ============================================================
 // Page Load: fetch branches, tables, bookings
 // ============================================================
@@ -700,7 +672,7 @@ if ($maCoSoHienTai > 0) {
         .catch(function(error) {
             formError.textContent = error && error.message && error.message !== 'INVALID_JSON_RESPONSE'
                 ? error.message
-                : 'Phan hoi may chu khong hop le. Vui long thu lai.';
+                : 'Phản hồi máy chủ không hợp lệ. Vui lòng thử lại.';
             formError.classList.remove('d-none');
             btnSaveBooking.disabled = false;
             btnSaveBooking.innerHTML = '<i class="fas fa-save"></i> Lưu đặt bàn';

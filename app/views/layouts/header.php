@@ -17,6 +17,7 @@
                 <ul>
                     <li><a href="<?php echo url('?page=menu'); ?>" class="<?php echo isActivePage('menu'); ?>">THỰC ĐƠN</a></li>
                     <li><a href="<?php echo url('?page=branches'); ?>" class="<?php echo isActivePage('branches'); ?>">CƠ SỞ</a></li>
+                    <li><a href="<?php echo url('?page=booking&action=lookup'); ?>" class="<?php echo (($_GET['page'] ?? '') === 'booking' && ($_GET['action'] ?? '') === 'lookup') ? 'active' : ''; ?>">TRA C&#7912;U &#272;&#7862;T B&#192;N</a></li>
                     <li><a href="<?php echo url('?page=admin'); ?>" class="<?php echo isActivePage('promotions'); ?>">QUẢN TRỊ</a></li>
                     <li><a href="<?php echo url('?page=contact'); ?>" class="<?php echo isActivePage('contact'); ?>">LIÊN HỆ</a></li>
                 </ul>
@@ -97,4 +98,3 @@
             .catch(() => {});
     });
     </script>
-</head>

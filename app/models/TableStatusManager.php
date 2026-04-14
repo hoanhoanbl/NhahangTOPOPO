@@ -1,5 +1,6 @@
 <?php
-require_once __DIR__ . '/../../config/config.php'; // Äá»c env vÃ  helper
+require_once __DIR__ . '/BookingModel.php';
+require_once __DIR__ . '/../../config/config.php'; // Ã„ÂÃ¡Â»Âc env vÃƒÂ  helper
 
 class TableStatusManager {
     private $conn;
@@ -13,11 +14,11 @@ class TableStatusManager {
     }
     
     /**
-     * Láº¥y káº¿t ná»‘i database
+     * LÃ¡ÂºÂ¥y kÃ¡ÂºÂ¿t nÃ¡Â»â€˜i database
      * @return mysqli
      */
     private static function getConnection() {
-        // Äá»c cáº¥u hÃ¬nh DB tá»« biáº¿n mÃ´i trÆ°á»ng (.env) vá»›i giÃ¡ trá»‹ máº·c Ä‘á»‹nh
+        // Ã„ÂÃ¡Â»Âc cÃ¡ÂºÂ¥u hÃƒÂ¬nh DB tÃ¡Â»Â« biÃ¡ÂºÂ¿n mÃƒÂ´i trÃ†Â°Ã¡Â»Âng (.env) vÃ¡Â»â€ºi giÃƒÂ¡ trÃ¡Â»â€¹ mÃ¡ÂºÂ·c Ã„â€˜Ã¡Â»â€¹nh
         $host = env('DB_HOST', 'localhost');
         $user = env('DB_USER', 'root');
         $pass = env('DB_PASS', '');
@@ -37,15 +38,15 @@ class TableStatusManager {
     }
     
     /**
-     * Kiá»ƒm tra tráº¡ng thÃ¡i bÃ n dá»±a vÃ o thá»i gian báº¯t Ä‘áº§u Ä‘áº·t bÃ n
-     * BÃ n Ä‘Æ°á»£c coi lÃ  Ä‘Ã£ Ä‘áº·t náº¿u cÃ³ Ä‘Æ¡n Ä‘áº·t trong khoáº£ng 2 giá» tá»›i
-     * @param int $maBan MÃ£ bÃ n
-     * @return string 'trong' hoáº·c 'da_dat'
+     * KiÃ¡Â»Æ’m tra trÃ¡ÂºÂ¡ng thÃƒÂ¡i bÃƒÂ n dÃ¡Â»Â±a vÃƒÂ o thÃ¡Â»Âi gian bÃ¡ÂºÂ¯t Ã„â€˜Ã¡ÂºÂ§u Ã„â€˜Ã¡ÂºÂ·t bÃƒÂ n
+     * BÃƒÂ n Ã„â€˜Ã†Â°Ã¡Â»Â£c coi lÃƒÂ  Ã„â€˜ÃƒÂ£ Ã„â€˜Ã¡ÂºÂ·t nÃ¡ÂºÂ¿u cÃƒÂ³ Ã„â€˜Ã†Â¡n Ã„â€˜Ã¡ÂºÂ·t trong khoÃ¡ÂºÂ£ng 2 giÃ¡Â»Â tÃ¡Â»â€ºi
+     * @param int $maBan MÃƒÂ£ bÃƒÂ n
+     * @return string 'trong' hoÃ¡ÂºÂ·c 'da_dat'
      */
     public static function kiemTraTrangThaiBan($maBan) { 
         $conn = self::getConnection();
 
-        // TÃ­nh thá»i gian hiá»‡n táº¡i + 2 giá»
+        // TÃƒÂ­nh thÃ¡Â»Âi gian hiÃ¡Â»â€¡n tÃ¡ÂºÂ¡i + 2 giÃ¡Â»Â
         $thoiGianHienTai = date('Y-m-d H:i:s');
         $thoiGianCong2Gio = date('Y-m-d H:i:s', strtotime('+2 hours'));
 
@@ -66,14 +67,14 @@ class TableStatusManager {
     }
 
     /**
-     * Láº¥y danh sÃ¡ch bÃ n theo cÆ¡ sá»Ÿ vá»›i tráº¡ng thÃ¡i dá»±a vÃ o thá»i gian Ä‘áº·t bÃ n
-     * @param int $maCoSo MÃ£ cÆ¡ sá»Ÿ
-     * @return array Danh sÃ¡ch bÃ n vá»›i tráº¡ng thÃ¡i
+     * LÃ¡ÂºÂ¥y danh sÃƒÂ¡ch bÃƒÂ n theo cÃ†Â¡ sÃ¡Â»Å¸ vÃ¡Â»â€ºi trÃ¡ÂºÂ¡ng thÃƒÂ¡i dÃ¡Â»Â±a vÃƒÂ o thÃ¡Â»Âi gian Ã„â€˜Ã¡ÂºÂ·t bÃƒÂ n
+     * @param int $maCoSo MÃƒÂ£ cÃ†Â¡ sÃ¡Â»Å¸
+     * @return array Danh sÃƒÂ¡ch bÃƒÂ n vÃ¡Â»â€ºi trÃ¡ÂºÂ¡ng thÃƒÂ¡i
      */
     public static function layBanTheoCoSo($maCoSo) {
         $conn = self::getConnection();
 
-        // TÃ­nh thá»i gian hiá»‡n táº¡i + 2 giá»
+        // TÃƒÂ­nh thÃ¡Â»Âi gian hiÃ¡Â»â€¡n tÃ¡ÂºÂ¡i + 2 giÃ¡Â»Â
         $thoiGianCong2Gio = date('Y-m-d H:i:s', strtotime('+2 hours'));
 
         $sql = "SELECT b.*,
@@ -106,86 +107,92 @@ class TableStatusManager {
     }
 
     /**
-     * Cáº­p nháº­t tráº¡ng thÃ¡i bÃ n - táº¡o hoáº·c xÃ³a Ä‘Æ¡n Ä‘áº·t bÃ n admin Ä‘á»ƒ Ä‘Ã¡nh dáº¥u tráº¡ng thÃ¡i
-     * @param int $maBan MÃ£ bÃ n
-     * @param string $trangThai Tráº¡ng thÃ¡i ('trong' hoáº·c 'da_dat')
+     * CÃ¡ÂºÂ­p nhÃ¡ÂºÂ­t trÃ¡ÂºÂ¡ng thÃƒÂ¡i bÃƒÂ n - tÃ¡ÂºÂ¡o hoÃ¡ÂºÂ·c xÃƒÂ³a Ã„â€˜Ã†Â¡n Ã„â€˜Ã¡ÂºÂ·t bÃƒÂ n admin Ã„â€˜Ã¡Â»Æ’ Ã„â€˜ÃƒÂ¡nh dÃ¡ÂºÂ¥u trÃ¡ÂºÂ¡ng thÃƒÂ¡i
+     * @param int $maBan MÃƒÂ£ bÃƒÂ n
+     * @param string $trangThai TrÃ¡ÂºÂ¡ng thÃƒÂ¡i ('trong' hoÃ¡ÂºÂ·c 'da_dat')
      * @return bool
      */
     public static function capNhatTrangThaiBan($maBan, $trangThai) {
         $conn = self::getConnection();
+        $bookingModel = new BookingModel($conn);
 
-        if ($trangThai == 'da_dat') {
-         
-
-            // Láº¥y MaCoSo tá»« bÃ n
+        if ($trangThai === 'da_dat') {
             $sqlGetCoSo = "SELECT MaCoSo FROM ban WHERE MaBan = ?";
             $stmtGetCoSo = mysqli_prepare($conn, $sqlGetCoSo);
             mysqli_stmt_bind_param($stmtGetCoSo, "i", $maBan);
             mysqli_stmt_execute($stmtGetCoSo);
             $result = mysqli_stmt_get_result($stmtGetCoSo);
             $ban = mysqli_fetch_assoc($result);
-            $maCoSo = $ban['MaCoSo'];
+            mysqli_stmt_close($stmtGetCoSo);
 
-            // Táº¡o hoáº·c láº¥y khÃ¡ch hÃ ng admin
-            $maKH = self::getOrCreateAdminCustomer($conn);
-
-            // Táº¡o Ä‘Æ¡n Ä‘áº·t bÃ n admin Ä‘á»ƒ Ä‘Ã¡nh dáº¥u bÃ n Ä‘Ã£ Ä‘áº·t
-            $sql = "INSERT INTO dondatban (MaKH, MaCoSo, SoLuongKH, ThoiGianBatDau, ThoiGianTao, TrangThai, GhiChu) 
-                    VALUES (?, ?, 1, NOW(), NOW(), 'da_xac_nhan', 'Admin Ä‘Ã¡nh dáº¥u bÃ n Ä‘Ã£ Ä‘áº·t')";
-            $stmt = mysqli_prepare($conn, $sql);
-            mysqli_stmt_bind_param($stmt, "ii", $maKH, $maCoSo);
-            mysqli_stmt_execute($stmt);
-            $maDon = mysqli_insert_id($conn);
-
-            // ThÃªm bÃ n vÃ o Ä‘Æ¡n Ä‘áº·t
-            $sql2 = "INSERT INTO dondatban_ban (MaDon, MaBan) VALUES (?, ?)";
-            $stmt2 = mysqli_prepare($conn, $sql2);
-            mysqli_stmt_bind_param($stmt2, "ii", $maDon, $maBan);
-            return mysqli_stmt_execute($stmt2);
-        } 
-        else {
-            // XÃ³a táº¥t cáº£ cÃ¡c Ä‘Æ¡n Ä‘áº·t bÃ n (cáº£ admin vÃ  nhÃ¢n viÃªn) Ä‘á»ƒ Ä‘Ã¡nh dáº¥u bÃ n trá»‘ng
-            mysqli_begin_transaction($conn);
-            
-            try {
-                // Láº¥y danh sÃ¡ch MaDon cáº§n xÃ³a
-                $getMaDonSql = "SELECT DISTINCT dd.MaDon 
-                               FROM dondatban dd
-                               JOIN dondatban_ban dbb ON dd.MaDon = dbb.MaDon
-                               WHERE dbb.MaBan = ? 
-                               AND dd.TrangThai IN ('cho_xac_nhan', 'da_xac_nhan')";
-                $getMaDonStmt = mysqli_prepare($conn, $getMaDonSql);
-                mysqli_stmt_bind_param($getMaDonStmt, "i", $maBan);
-                mysqli_stmt_execute($getMaDonStmt);
-                $result = mysqli_stmt_get_result($getMaDonStmt);
-                
-                $maDonList = [];
-                while ($row = mysqli_fetch_assoc($result)) {
-                    $maDonList[] = $row['MaDon'];
-                }
-                
-                if (!empty($maDonList)) {
-                    $placeholders = str_repeat('?,', count($maDonList) - 1) . '?';
-                   
-                    // XÃ³a dondatban_ban
-                    $deleteBanSql = "DELETE FROM dondatban_ban WHERE MaDon IN ($placeholders)";
-                    $deleteBanStmt = mysqli_prepare($conn, $deleteBanSql);
-                    mysqli_stmt_bind_param($deleteBanStmt, str_repeat('i', count($maDonList)), ...$maDonList);
-                    mysqli_stmt_execute($deleteBanStmt);
-                }
-                
-                mysqli_commit($conn);
-                return true;
-            } catch (Exception $e) {
-                mysqli_rollback($conn);
+            $maCoSo = isset($ban['MaCoSo']) ? (int)$ban['MaCoSo'] : 0;
+            if ($maCoSo <= 0) {
                 return false;
             }
+
+            $maKH = self::getOrCreateAdminCustomer($conn);
+            $maDon = $bookingModel->createBookingRecord([
+                'maKH' => $maKH,
+                'maCoSo' => $maCoSo,
+                'soLuongKH' => 1,
+                'thoiGianBatDau' => date('Y-m-d H:i:s'),
+                'ghiChu' => 'Admin danh dau ban da dat',
+                'status' => 'da_xac_nhan',
+                'selectedTables' => [$maBan],
+                'actor_type' => 'system',
+                'actor_name' => 'Admin',
+                'source' => 'table_status_manual_book',
+            ]);
+
+            return (bool)$maDon;
         }
+
+        if ($trangThai === 'trong') {
+            $query = "SELECT DISTINCT dd.MaDon, dd.MaCoSo
+                      FROM dondatban dd
+                      JOIN dondatban_ban dbb ON dd.MaDon = dbb.MaDon
+                      WHERE dbb.MaBan = ?
+                        AND dd.TrangThai IN ('cho_xac_nhan', 'da_xac_nhan')";
+            $stmt = mysqli_prepare($conn, $query);
+            mysqli_stmt_bind_param($stmt, "i", $maBan);
+            mysqli_stmt_execute($stmt);
+            $result = mysqli_stmt_get_result($stmt);
+
+            $activeBookings = [];
+            while ($row = mysqli_fetch_assoc($result)) {
+                $activeBookings[] = $row;
+            }
+            mysqli_stmt_close($stmt);
+
+            foreach ($activeBookings as $booking) {
+                $changeResult = $bookingModel->changeStatus(
+                    (int)$booking['MaDon'],
+                    (int)$booking['MaCoSo'],
+                    'hoan_thanh',
+                    [
+                        'actor_type' => 'system',
+                        'actor_name' => 'Admin',
+                        'note' => 'Giai phong ban thu cong tu man trang thai ban.',
+                        'source' => 'table_status_manual_release',
+                        'metadata' => [
+                            'tableId' => (int)$maBan,
+                        ],
+                    ]
+                );
+
+                if (empty($changeResult['success'])) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
-
     /**
-     * Láº¥y danh sÃ¡ch cÆ¡ sá»Ÿ
+     * LÃ¡ÂºÂ¥y danh sÃƒÂ¡ch cÃ†Â¡ sÃ¡Â»Å¸
      * @return array
      */
     public static function layDanhSachCoSo() {
@@ -203,9 +210,9 @@ class TableStatusManager {
     }
 
     /**
-     * Láº¥y thÃ´ng tin cÆ¡ sá»Ÿ theo mÃ£ cÆ¡ sá»Ÿ
-     * @param int $maCoSo MÃ£ cÆ¡ sá»Ÿ
-     * @return array|null ThÃ´ng tin cÆ¡ sá»Ÿ
+     * LÃ¡ÂºÂ¥y thÃƒÂ´ng tin cÃ†Â¡ sÃ¡Â»Å¸ theo mÃƒÂ£ cÃ†Â¡ sÃ¡Â»Å¸
+     * @param int $maCoSo MÃƒÂ£ cÃ†Â¡ sÃ¡Â»Å¸
+     * @return array|null ThÃƒÂ´ng tin cÃ†Â¡ sÃ¡Â»Å¸
      */
     public static function layThongTinCoSo($maCoSo) {
         $conn = self::getConnection();
@@ -220,9 +227,9 @@ class TableStatusManager {
     }
 
     /**
-     * Láº¥y thÃ´ng tin cÆ¡ báº£n cá»§a bÃ n
-     * @param int $maBan MÃ£ bÃ n
-     * @return array|null ThÃ´ng tin bÃ n
+     * LÃ¡ÂºÂ¥y thÃƒÂ´ng tin cÃ†Â¡ bÃ¡ÂºÂ£n cÃ¡Â»Â§a bÃƒÂ n
+     * @param int $maBan MÃƒÂ£ bÃƒÂ n
+     * @return array|null ThÃƒÂ´ng tin bÃƒÂ n
      */
     public static function layThongTinBan($maBan) {
         $conn = self::getConnection();
@@ -240,9 +247,9 @@ class TableStatusManager {
     }
 
     /**
-     * Láº¥y thÃ´ng tin chi tiáº¿t cá»§a bÃ n bao gá»“m tráº¡ng thÃ¡i hiá»‡n táº¡i
-     * @param int $maBan MÃ£ bÃ n
-     * @return array|null ThÃ´ng tin bÃ n chi tiáº¿t
+     * LÃ¡ÂºÂ¥y thÃƒÂ´ng tin chi tiÃ¡ÂºÂ¿t cÃ¡Â»Â§a bÃƒÂ n bao gÃ¡Â»â€œm trÃ¡ÂºÂ¡ng thÃƒÂ¡i hiÃ¡Â»â€¡n tÃ¡ÂºÂ¡i
+     * @param int $maBan MÃƒÂ£ bÃƒÂ n
+     * @return array|null ThÃƒÂ´ng tin bÃƒÂ n chi tiÃ¡ÂºÂ¿t
      */
     public static function layThongTinBanChiTiet($maBan) {
         $conn = self::getConnection();
@@ -270,22 +277,22 @@ class TableStatusManager {
     }
 
     // =================================================================
-    // CÃC HÃ€M ÄÆ¯á»¢C Gá»˜PVÃ€O Tá»ª TableModel.php
+    // CÃƒÂC HÃƒâ‚¬M Ã„ÂÃ†Â¯Ã¡Â»Â¢C GÃ¡Â»ËœPVÃƒâ‚¬O TÃ¡Â»Âª TableModel.php
     // =================================================================
 
     /**
-     * Láº¥y danh sÃ¡ch bÃ n trá»‘ng cá»§a cÆ¡ sá»Ÿ khi táº¡o Ä‘Æ¡n Ä‘áº·t bÃ n (tá»« TableModel)
-     * @param int $maCoSo MÃ£ cÆ¡ sá»Ÿ
-     * @param string $ngayDat NgÃ y Ä‘áº·t (Y-m-d)
-     * @param string $gioDat Giá» Ä‘áº·t (H:i)
-     * @param int $soNguoi Sá»‘ ngÆ°á»i
-     * @return array Danh sÃ¡ch bÃ n trá»‘ng
+     * LÃ¡ÂºÂ¥y danh sÃƒÂ¡ch bÃƒÂ n trÃ¡Â»â€˜ng cÃ¡Â»Â§a cÃ†Â¡ sÃ¡Â»Å¸ khi tÃ¡ÂºÂ¡o Ã„â€˜Ã†Â¡n Ã„â€˜Ã¡ÂºÂ·t bÃƒÂ n (tÃ¡Â»Â« TableModel)
+     * @param int $maCoSo MÃƒÂ£ cÃ†Â¡ sÃ¡Â»Å¸
+     * @param string $ngayDat NgÃƒÂ y Ã„â€˜Ã¡ÂºÂ·t (Y-m-d)
+     * @param string $gioDat GiÃ¡Â»Â Ã„â€˜Ã¡ÂºÂ·t (H:i)
+     * @param int $soNguoi SÃ¡Â»â€˜ ngÃ†Â°Ã¡Â»Âi
+     * @return array Danh sÃƒÂ¡ch bÃƒÂ n trÃ¡Â»â€˜ng
      */
     public static function layBanTrong($maCoSo, $ngayDat, $gioDat, $soNguoi = 1) {
         $conn = self::getConnection();
         
         try {
-            // Láº¥y táº¥t cáº£ bÃ n cá»§a cÆ¡ sá»Ÿ
+            // LÃ¡ÂºÂ¥y tÃ¡ÂºÂ¥t cÃ¡ÂºÂ£ bÃƒÂ n cÃ¡Â»Â§a cÃ†Â¡ sÃ¡Â»Å¸
             $sql = "SELECT MaBan, TenBan, SucChua FROM ban WHERE MaCoSo = ? AND SucChua >= ? ORDER BY TenBan";
             $stmt = mysqli_prepare($conn, $sql);
             mysqli_stmt_bind_param($stmt, "ii", $maCoSo, $soNguoi);
@@ -301,10 +308,10 @@ class TableStatusManager {
                 return [];
             }
             
-            // Láº¥y danh sÃ¡ch bÃ n Ä‘Ã£ Ä‘Æ°á»£c Ä‘áº·t trong khoáº£ng thá»i gian
+            // LÃ¡ÂºÂ¥y danh sÃƒÂ¡ch bÃƒÂ n Ã„â€˜ÃƒÂ£ Ã„â€˜Ã†Â°Ã¡Â»Â£c Ã„â€˜Ã¡ÂºÂ·t trong khoÃ¡ÂºÂ£ng thÃ¡Â»Âi gian
             $bookedTables = self::layBanDaDat($maCoSo, $ngayDat, $gioDat);
             
-            // Lá»c bá» cÃ¡c bÃ n Ä‘Ã£ Ä‘Æ°á»£c Ä‘áº·t
+            // LÃ¡Â»Âc bÃ¡Â»Â cÃƒÂ¡c bÃƒÂ n Ã„â€˜ÃƒÂ£ Ã„â€˜Ã†Â°Ã¡Â»Â£c Ã„â€˜Ã¡ÂºÂ·t
             $availableTables = [];
             foreach ($allTables as $table) {
                 if (!in_array($table['MaBan'], $bookedTables)) {
@@ -321,17 +328,17 @@ class TableStatusManager {
     }
 
     /**
-     * Láº¥y danh sÃ¡ch bÃ n Ä‘Ã£ Ä‘Æ°á»£c Ä‘áº·t trong khoáº£ng thá»i gian (Â±2 giá») (tá»« TableModel)
-     * @param int $maCoSo MÃ£ cÆ¡ sá»Ÿ
-     * @param string $ngayDat NgÃ y Ä‘áº·t (Y-m-d)
-     * @param string $gioDat Giá» Ä‘áº·t (H:i)
-     * @return array Danh sÃ¡ch mÃ£ bÃ n Ä‘Ã£ Ä‘áº·t
+     * LÃ¡ÂºÂ¥y danh sÃƒÂ¡ch bÃƒÂ n Ã„â€˜ÃƒÂ£ Ã„â€˜Ã†Â°Ã¡Â»Â£c Ã„â€˜Ã¡ÂºÂ·t trong khoÃ¡ÂºÂ£ng thÃ¡Â»Âi gian (Ã‚Â±2 giÃ¡Â»Â) (tÃ¡Â»Â« TableModel)
+     * @param int $maCoSo MÃƒÂ£ cÃ†Â¡ sÃ¡Â»Å¸
+     * @param string $ngayDat NgÃƒÂ y Ã„â€˜Ã¡ÂºÂ·t (Y-m-d)
+     * @param string $gioDat GiÃ¡Â»Â Ã„â€˜Ã¡ÂºÂ·t (H:i)
+     * @return array Danh sÃƒÂ¡ch mÃƒÂ£ bÃƒÂ n Ã„â€˜ÃƒÂ£ Ã„â€˜Ã¡ÂºÂ·t
      */
     public static function layBanDaDat($maCoSo, $ngayDat, $gioDat) {
         $conn = self::getConnection();
         
         try {
-            // TÃ­nh toÃ¡n khoáº£ng thá»i gian xung Ä‘á»™t (Â±2 giá»)
+            // TÃƒÂ­nh toÃƒÂ¡n khoÃ¡ÂºÂ£ng thÃ¡Â»Âi gian xung Ã„â€˜Ã¡Â»â„¢t (Ã‚Â±2 giÃ¡Â»Â)
             $timeStart = date('H:i', strtotime($gioDat . ' -2 hours'));
             $timeEnd = date('H:i', strtotime($gioDat . ' +2 hours'));
             
@@ -365,15 +372,15 @@ class TableStatusManager {
     }
 
     /**
-     * Kiá»ƒm tra xem bÃ n cÃ³ sáºµn vÃ o thá»i Ä‘iá»ƒm cá»¥ thá»ƒ khÃ´ng (tá»« TableModel)
-     * @param int $maBan MÃ£ bÃ n
-     * @param string $ngayDat NgÃ y Ä‘áº·t (Y-m-d)
-     * @param string $gioDat Giá» Ä‘áº·t (H:i)
-     * @return bool True náº¿u bÃ n cÃ³ sáºµn
+     * KiÃ¡Â»Æ’m tra xem bÃƒÂ n cÃƒÂ³ sÃ¡ÂºÂµn vÃƒÂ o thÃ¡Â»Âi Ã„â€˜iÃ¡Â»Æ’m cÃ¡Â»Â¥ thÃ¡Â»Æ’ khÃƒÂ´ng (tÃ¡Â»Â« TableModel)
+     * @param int $maBan MÃƒÂ£ bÃƒÂ n
+     * @param string $ngayDat NgÃƒÂ y Ã„â€˜Ã¡ÂºÂ·t (Y-m-d)
+     * @param string $gioDat GiÃ¡Â»Â Ã„â€˜Ã¡ÂºÂ·t (H:i)
+     * @return bool True nÃ¡ÂºÂ¿u bÃƒÂ n cÃƒÂ³ sÃ¡ÂºÂµn
      */
     public static function kiemTraBanCoSan($maBan, $ngayDat, $gioDat) {
         try {
-            // Láº¥y thÃ´ng tin bÃ n Ä‘á»ƒ biáº¿t cÆ¡ sá»Ÿ
+            // LÃ¡ÂºÂ¥y thÃƒÂ´ng tin bÃƒÂ n Ã„â€˜Ã¡Â»Æ’ biÃ¡ÂºÂ¿t cÃ†Â¡ sÃ¡Â»Å¸
             $tableInfo = self::layThongTinBan($maBan);
             if (!$tableInfo) {
                 return false;
@@ -390,9 +397,9 @@ class TableStatusManager {
     }
 
     /**
-     * Láº¥y táº¥t cáº£ bÃ n cá»§a má»™t cÆ¡ sá»Ÿ (tá»« TableModel) - tÆ°Æ¡ng tá»± layBanTheoCoSo nhÆ°ng khÃ´ng cÃ³ tráº¡ng thÃ¡i
-     * @param int $maCoSo MÃ£ cÆ¡ sá»Ÿ
-     * @return array Danh sÃ¡ch bÃ n
+     * LÃ¡ÂºÂ¥y tÃ¡ÂºÂ¥t cÃ¡ÂºÂ£ bÃƒÂ n cÃ¡Â»Â§a mÃ¡Â»â„¢t cÃ†Â¡ sÃ¡Â»Å¸ (tÃ¡Â»Â« TableModel) - tÃ†Â°Ã†Â¡ng tÃ¡Â»Â± layBanTheoCoSo nhÃ†Â°ng khÃƒÂ´ng cÃƒÂ³ trÃ¡ÂºÂ¡ng thÃƒÂ¡i
+     * @param int $maCoSo MÃƒÂ£ cÃ†Â¡ sÃ¡Â»Å¸
+     * @return array Danh sÃƒÂ¡ch bÃƒÂ n
      */
     public static function layTatCaBanTheoCoSo($maCoSo) {
         $conn = self::getConnection();
@@ -418,15 +425,15 @@ class TableStatusManager {
     }
 
     /**
-     * Láº¥y danh sÃ¡ch bÃ n trá»‘ng theo logic thá»i gian thá»±c (khÃ´ng cÃ³ Ä‘Æ¡n Ä‘áº·t trong vÃ²ng 2 giá» tá»›i)
-     * @param int $maCoSo MÃ£ cÆ¡ sá»Ÿ
-     * @return array Danh sÃ¡ch bÃ n trá»‘ng
+     * LÃ¡ÂºÂ¥y danh sÃƒÂ¡ch bÃƒÂ n trÃ¡Â»â€˜ng theo logic thÃ¡Â»Âi gian thÃ¡Â»Â±c (khÃƒÂ´ng cÃƒÂ³ Ã„â€˜Ã†Â¡n Ã„â€˜Ã¡ÂºÂ·t trong vÃƒÂ²ng 2 giÃ¡Â»Â tÃ¡Â»â€ºi)
+     * @param int $maCoSo MÃƒÂ£ cÃ†Â¡ sÃ¡Â»Å¸
+     * @return array Danh sÃƒÂ¡ch bÃƒÂ n trÃ¡Â»â€˜ng
      */
     public static function layBanTrongTheoThoiGian($maCoSo) {
         $conn = self::getConnection();
         
         try {
-            // TÃ­nh thá»i gian hiá»‡n táº¡i + 2 giá»
+            // TÃƒÂ­nh thÃ¡Â»Âi gian hiÃ¡Â»â€¡n tÃ¡ÂºÂ¡i + 2 giÃ¡Â»Â
             $thoiGianCong2Gio = date('Y-m-d H:i:s', strtotime('+2 hours'));
             
             $sql = "SELECT b.MaBan, b.TenBan, b.SucChua 
@@ -461,9 +468,9 @@ class TableStatusManager {
     }
 
     /**
-     * Láº¥y danh sÃ¡ch bÃ n khÃ´ng cÃ³ trong dondatban_ban (tá»« TableModel)
-     * @param int $maCoSo MÃ£ cÆ¡ sá»Ÿ
-     * @return array Danh sÃ¡ch bÃ n chÆ°a Ä‘Æ°á»£c Ä‘áº·t
+     * LÃ¡ÂºÂ¥y danh sÃƒÂ¡ch bÃƒÂ n khÃƒÂ´ng cÃƒÂ³ trong dondatban_ban (tÃ¡Â»Â« TableModel)
+     * @param int $maCoSo MÃƒÂ£ cÃ†Â¡ sÃ¡Â»Å¸
+     * @return array Danh sÃƒÂ¡ch bÃƒÂ n chÃ†Â°a Ã„â€˜Ã†Â°Ã¡Â»Â£c Ã„â€˜Ã¡ÂºÂ·t
      */
     public static function layBanChuaDuocDat($maCoSo) {
         $conn = self::getConnection();
@@ -494,10 +501,10 @@ class TableStatusManager {
     }
 
     /**
-     * HÃ m helper Ä‘á»ƒ táº¡o hoáº·c láº¥y khÃ¡ch hÃ ng admin (cáº§n thiáº¿t cho capNhatTrangThaiBan)
+     * HÃƒÂ m helper Ã„â€˜Ã¡Â»Æ’ tÃ¡ÂºÂ¡o hoÃ¡ÂºÂ·c lÃ¡ÂºÂ¥y khÃƒÂ¡ch hÃƒÂ ng admin (cÃ¡ÂºÂ§n thiÃ¡ÂºÂ¿t cho capNhatTrangThaiBan)
      */
     private static function getOrCreateAdminCustomer($conn) {
-        // Kiá»ƒm tra xem Ä‘Ã£ cÃ³ khÃ¡ch hÃ ng admin chÆ°a
+        // KiÃ¡Â»Æ’m tra xem Ã„â€˜ÃƒÂ£ cÃƒÂ³ khÃƒÂ¡ch hÃƒÂ ng admin chÃ†Â°a
         $sql = "SELECT MaKH FROM khachhang WHERE TenKH = 'Admin System' AND Email = 'admin@system.local'";
         $result = mysqli_query($conn, $sql);
         
@@ -505,32 +512,25 @@ class TableStatusManager {
             $row = mysqli_fetch_assoc($result);
             return $row['MaKH'];
         } else {
-            // Táº¡o khÃ¡ch hÃ ng admin má»›i
+            // TÃ¡ÂºÂ¡o khÃƒÂ¡ch hÃƒÂ ng admin mÃ¡Â»â€ºi
             $sql = "INSERT INTO khachhang (TenKH, Email, SDT) VALUES ('Admin System', 'admin@system.local', '0000000000')";
             mysqli_query($conn, $sql);
             return mysqli_insert_id($conn);
         }
     }
 
-    // XÃ³a cÃ¡c Ä‘Æ¡n Ä‘áº·t bÃ n quÃ¡ háº¡n thá»i gian
+    // XÃƒÂ³a cÃƒÂ¡c Ã„â€˜Ã†Â¡n Ã„â€˜Ã¡ÂºÂ·t bÃƒÂ n quÃƒÂ¡ hÃ¡ÂºÂ¡n thÃ¡Â»Âi gian
     public static function xoaDonDatBanQuaHan($maCoSo = null) {
         $conn = self::getConnection();
-        
+        $bookingModel = new BookingModel($conn);
+
         try {
-            mysqli_begin_transaction($conn);
-            
-            // TÃ­nh thá»i gian háº¿t háº¡n (1 phÃºt trÆ°á»›c thá»i Ä‘iá»ƒm hiá»‡n táº¡i)
-            $currentTime = date('Y-m-d H:i:s');
-            
-            // TÃ¬m cÃ¡c Ä‘Æ¡n Ä‘áº·t bÃ n quÃ¡ háº¡n (Ä‘Ã£ qua thá»i gian báº¯t Ä‘áº§u hÆ¡n 60 giÃ¢y)
-            $sql = "SELECT dd.MaDon, dd.ThoiGianBatDau, dd.MaCoSo, cs.TenCoSo
+            $sql = "SELECT dd.MaDon, dd.MaCoSo, dd.ThoiGianBatDau, dd.TrangThai, cs.TenCoSo
                     FROM dondatban dd
                     JOIN coso cs ON dd.MaCoSo = cs.MaCoSo
                     WHERE dd.TrangThai IN ('cho_xac_nhan', 'da_xac_nhan')
-                    AND TIMESTAMPDIFF(SECOND, dd.ThoiGianBatDau, NOW()) > 30";
-            
-            
-            // Náº¿u cÃ³ mÃ£ cÆ¡ sá»Ÿ cá»¥ thá»ƒ
+                      AND TIMESTAMPDIFF(SECOND, dd.ThoiGianBatDau, NOW()) > 30";
+
             if ($maCoSo !== null) {
                 $sql .= " AND dd.MaCoSo = ?";
                 $stmt = mysqli_prepare($conn, $sql);
@@ -538,81 +538,64 @@ class TableStatusManager {
             } else {
                 $stmt = mysqli_prepare($conn, $sql);
             }
-            
+
             mysqli_stmt_execute($stmt);
             $result = mysqli_stmt_get_result($stmt);
-            
+
             $expiredOrders = [];
-            $maDonList = [];
-            
             while ($row = mysqli_fetch_assoc($result)) {
                 $expiredOrders[] = $row;
-                $maDonList[] = $row['MaDon'];
             }
-            
-            if (empty($maDonList)) {
-                mysqli_commit($conn);
+            mysqli_stmt_close($stmt);
+
+            if (empty($expiredOrders)) {
                 return [
                     'success' => true,
                     'deleted_count' => 0,
-                    'message' => 'KhÃ´ng cÃ³ Ä‘Æ¡n Ä‘áº·t bÃ n nÃ o quÃ¡ háº¡n'
+                    'message' => 'Khong co don dat ban nao qua han'
                 ];
             }
-            
-            // Táº¡o placeholders cho IN clause
-            $placeholders = str_repeat('?,', count($maDonList) - 1) . '?';
-            $paramTypes = str_repeat('i', count($maDonList));
-            
-           
-            
-            // Cáº­p nháº­t tráº¡ng thÃ¡i Ä‘Æ¡n Ä‘áº·t bÃ n thÃ nh 'da_huy' thay vÃ¬ xÃ³a hoÃ n toÃ n
-            $updateDonSql = "UPDATE dondatban 
-                            SET TrangThai = 'hoan_thanh', 
-                                GhiChu = CONCAT(IFNULL(GhiChu, ''), ' [Tá»± Ä‘á»™ng há»§y do quÃ¡ háº¡n]')
-                            WHERE MaDon IN ($placeholders)";
-            $updateDonStmt = mysqli_prepare($conn, $updateDonSql);
-            mysqli_stmt_bind_param($updateDonStmt, $paramTypes, ...$maDonList);
-            mysqli_stmt_execute($updateDonStmt);
-            $updatedDon = mysqli_stmt_affected_rows($updateDonStmt);
-            
-            mysqli_commit($conn);
 
-            $deletedBanSql = "DELETE FROM dondatban_ban WHERE MaDon IN ($placeholders)";
-            $deletedBanStmt = mysqli_prepare($conn, $deletedBanSql);
-            mysqli_stmt_bind_param($deletedBanStmt, $paramTypes, ...$maDonList);
-            mysqli_stmt_execute($deletedBanStmt);
-            $deletedBan = mysqli_stmt_affected_rows($deletedBanStmt);
+            $cancelledCount = 0;
+            foreach ($expiredOrders as $order) {
+                $changeResult = $bookingModel->changeStatus(
+                    (int)$order['MaDon'],
+                    (int)$order['MaCoSo'],
+                    'da_huy',
+                    [
+                        'actor_type' => 'system',
+                        'actor_name' => 'System',
+                        'note' => 'Tu dong huy do qua han.',
+                        'require_reason' => false,
+                        'source' => 'booking_expiry_cleanup',
+                        'metadata' => [
+                            'expiredAt' => date('Y-m-d H:i:s'),
+                        ],
+                    ]
+                );
 
-            mysqli_commit($conn);
+                if (!empty($changeResult['success'])) {
+                    $cancelledCount++;
+                }
+            }
 
-            // Log thÃ´ng tin cleanup
-            // error_log("TableStatusManager: ÄÃ£ cleanup " . count($maDonList) . " Ä‘Æ¡n Ä‘áº·t bÃ n quÃ¡ háº¡n");
-            // foreach ($expiredOrders as $order) {
-            //     error_log("- MaDon: {$order['MaDon']}, ThoiGianBatDau: {$order['ThoiGianBatDau']}, CoSo: {$order['TenCoSo']}");
-            // }
-            
             return [
                 'success' => true,
-                'deleted_count' => count($maDonList),
+                'deleted_count' => $cancelledCount,
                 'expired_orders' => $expiredOrders,
                 'details' => [
-                    'ban_deleted' => $deletedBan,
-                    'don_updated' => $updatedDon
+                    'cancelled' => $cancelledCount,
+                    'evaluated' => count($expiredOrders)
                 ],
-                'message' => "ÄÃ£ cleanup " . count($maDonList) . " Ä‘Æ¡n Ä‘áº·t bÃ n quÃ¡ háº¡n"
+                'message' => "Da tu dong huy {$cancelledCount} don dat ban qua han"
             ];
-            
         } catch (Exception $e) {
-            mysqli_rollback($conn);
             error_log("Error in xoaDonDatBanQuaHan: " . $e->getMessage());
-            
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
-                'message' => 'CÃ³ lá»—i xáº£y ra khi cleanup Ä‘Æ¡n Ä‘áº·t bÃ n quÃ¡ háº¡n'
+                'message' => 'Co loi xay ra khi cleanup don dat ban qua han'
             ];
         }
-    }
-
-    
-}
+    }}

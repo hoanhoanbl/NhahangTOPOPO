@@ -1,7 +1,7 @@
 <?php
 /**
  * File: app/views/menu2/process-create.php
- * Xử lý tạo đặt bàn từ form menu2
+ * Xu ly tao dat ban tu form menu2
  */
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -9,11 +9,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-include __DIR__ . '../../../../config/connect.php';
+require_once dirname(__DIR__, 3) . '/config/connect.php';
 
 require_once __DIR__ . '/../../helpers/DateHelper.php';
 require_once __DIR__ . '/../../models/BookingRulesModel.php';
 require_once __DIR__ . '/../../models/DepositCalculator.php';
+require_once __DIR__ . '/../../models/BookingModel.php';
 require_once __DIR__ . '/../../models/TableAllocationService.php';
 
 $customerName  = trim($_POST['customer_name'] ?? '');
@@ -35,8 +36,6 @@ if (empty($cartItems) || !is_array($cartItems)) {
     echo 'Giỏ hàng trống.';
     exit();
 }
-
-$transactionStarted = false;
 
 try {
     $bookingDateTime = DateTime::createFromFormat('Y-m-d H:i', $bookingDate . ' ' . $bookingTime);
@@ -69,14 +68,7 @@ try {
         throw new Exception("Chỉ hỗ trợ đặt trước tối đa {$maxDays} ngày.");
     }
 
-    mysqli_begin_transaction($conn);
-    $transactionStarted = true;
-
-    $maKH = createOrGetCustomer($conn, $customerName, $customerPhone, $customerEmail);
     $bookingDateTimeStr = $bookingDate . ' ' . $bookingTime;
-
-    $bookingId = createBooking($conn, $maKH, $branchId, $guestCount, $bookingDateTimeStr, $notes);
-
     $allocation = TableAllocationService::allocateForBooking(
         $conn,
         $branchId,
@@ -91,143 +83,51 @@ try {
         throw new Exception('Rất tiếc! Không còn bàn trống phù hợp với thời gian bạn chọn. Vui lòng chọn thời gian khác.');
     }
 
-    assignTablesToBooking($conn, $bookingId, $branchId, $bookingDateTimeStr, $leadHours, $allocation['tables']);
-
-    addMenuItemsToBooking($conn, $bookingId, $branchId, $cartItems);
-
-    $menuTotal = array_sum(array_map(static fn($item) => ((float)$item['price']) * ((int)$item['quantity']), $cartItems));
-    $deposit = DepositCalculator::calculate($bookingDateTime, $menuTotal);
-
-    mysqli_commit($conn);
-    $transactionStarted = false;
-
-    if ($deposit > 0) {
-        header("Location: ../../../sepay/sepay_payment.php?booking_id={$bookingId}&amount={$deposit}");
-    } else {
-        header("Location: ../../../app/views/booking/success.php?id={$bookingId}");
-    }
-    exit();
-} catch (Exception $e) {
-    if ($transactionStarted) {
-        mysqli_rollback($conn);
-    }
-    echo $e->getMessage();
-    exit();
-}
-
-function createOrGetCustomer(mysqli $conn, string $name, string $phone, string $email): int
-{
-    $stmt = mysqli_prepare($conn, "SELECT MaKH FROM khachhang WHERE SDT = ? LIMIT 1");
-    mysqli_stmt_bind_param($stmt, 's', $phone);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-
-    if ($row = mysqli_fetch_assoc($result)) {
-        mysqli_stmt_close($stmt);
-        return (int)$row['MaKH'];
-    }
-    mysqli_stmt_close($stmt);
-
-    $stmt2 = mysqli_prepare($conn, "INSERT INTO khachhang (TenKH, SDT, Email) VALUES (?, ?, ?)");
-    mysqli_stmt_bind_param($stmt2, 'sss', $name, $phone, $email);
-    if (!mysqli_stmt_execute($stmt2)) {
-        mysqli_stmt_close($stmt2);
-        throw new Exception('Không thể tạo thông tin khách hàng.');
-    }
-    $id = (int)mysqli_insert_id($conn);
-    mysqli_stmt_close($stmt2);
-
-    if ($id <= 0) {
-        throw new Exception('Không thể tạo thông tin khách hàng.');
-    }
-    return $id;
-}
-
-function createBooking(mysqli $conn, int $maKH, int $maCoSo, int $soLuongKH, string $thoiGianBatDau, string $ghiChu): int
-{
-    $stmt = mysqli_prepare(
-        $conn,
-        "INSERT INTO dondatban (MaKH, MaCoSo, SoLuongKH, ThoiGianBatDau, GhiChu, TrangThai, ThoiGianTao)
-         VALUES (?, ?, ?, ?, ?, 'cho_xac_nhan', NOW())"
-    );
-    mysqli_stmt_bind_param($stmt, 'iiiss', $maKH, $maCoSo, $soLuongKH, $thoiGianBatDau, $ghiChu);
-
-    if (!mysqli_stmt_execute($stmt)) {
-        mysqli_stmt_close($stmt);
-        throw new Exception('Không thể tạo đơn đặt bàn.');
-    }
-
-    $id = (int)mysqli_insert_id($conn);
-    mysqli_stmt_close($stmt);
-
-    if ($id <= 0) {
-        throw new Exception('Không thể tạo đơn đặt bàn.');
-    }
-    return $id;
-}
-
-function assignTablesToBooking(mysqli $conn, int $bookingId, int $branchId, string $bookingDateTime, int $leadHours, array $tables): void
-{
-    $insertSql = "INSERT INTO dondatban_ban (MaDon, MaBan) VALUES (?, ?)";
-    $insertStmt = mysqli_prepare($conn, $insertSql);
-    if (!$insertStmt) {
-        throw new Exception('Không thể chuẩn bị gán bàn.');
-    }
-
-    foreach ($tables as $table) {
+    $selectedTables = [];
+    foreach ($allocation['tables'] as $table) {
         $tableId = (int)($table['MaBan'] ?? 0);
         if ($tableId <= 0) {
-            mysqli_stmt_close($insertStmt);
             throw new Exception('Dữ liệu bàn gán không hợp lệ.');
         }
 
-        // Re-check conflict in transactional flow to reduce race condition impact.
-        if (!TableAllocationService::isTableAvailable($conn, $branchId, $tableId, $bookingDateTime, $leadHours)) {
-            mysqli_stmt_close($insertStmt);
+        if (!TableAllocationService::isTableAvailable($conn, $branchId, $tableId, $bookingDateTimeStr, $leadHours)) {
             throw new Exception('Bàn vừa được đặt bởi khách khác. Vui lòng thử lại.');
         }
 
-        mysqli_stmt_bind_param($insertStmt, 'ii', $bookingId, $tableId);
-        if (!mysqli_stmt_execute($insertStmt)) {
-            mysqli_stmt_close($insertStmt);
-            throw new Exception('Không thể gán bàn cho đơn đặt bàn.');
-        }
+        $selectedTables[] = $tableId;
     }
 
-    mysqli_stmt_close($insertStmt);
-}
+    $bookingModel = new BookingModel($conn);
+    $bookingId = $bookingModel->createBookingRecord([
+        'tenKH' => $customerName,
+        'sdt' => $customerPhone,
+        'email' => $customerEmail,
+        'maCoSo' => $branchId,
+        'soLuongKH' => $guestCount,
+        'thoiGianBatDau' => $bookingDateTimeStr,
+        'ghiChu' => $notes,
+        'status' => 'cho_xac_nhan',
+        'selectedTables' => $selectedTables,
+        'cartItems' => $cartItems,
+        'actor_type' => 'customer',
+        'actor_name' => $customerName !== '' ? $customerName : 'Khách hàng',
+        'source' => 'menu2_public_booking',
+    ]);
 
-function addMenuItemsToBooking(mysqli $conn, int $bookingId, int $branchId, array $cartItems): void
-{
-    foreach ($cartItems as $item) {
-        $menuId = (int)($item['id'] ?? 0);
-        $quantity = (int)($item['quantity'] ?? 0);
-        if ($menuId <= 0 || $quantity <= 0) {
-            throw new Exception('Dữ liệu món ăn không hợp lệ.');
-        }
-
-        $priceStmt = mysqli_prepare($conn, "SELECT Gia FROM menu_coso WHERE MaMon = ? AND MaCoSo = ?");
-        mysqli_stmt_bind_param($priceStmt, 'ii', $menuId, $branchId);
-        mysqli_stmt_execute($priceStmt);
-        $priceResult = mysqli_stmt_get_result($priceStmt);
-
-        $currentPrice = (float)($item['price'] ?? 0);
-        if ($priceRow = mysqli_fetch_assoc($priceResult)) {
-            $currentPrice = (float)$priceRow['Gia'];
-        }
-        mysqli_stmt_close($priceStmt);
-
-        $insertStmt = mysqli_prepare(
-            $conn,
-            "INSERT INTO chitietdondatban (MaDon, MaMon, SoLuong, DonGia) VALUES (?, ?, ?, ?)"
-        );
-        mysqli_stmt_bind_param($insertStmt, 'iiid', $bookingId, $menuId, $quantity, $currentPrice);
-
-        if (!mysqli_stmt_execute($insertStmt)) {
-            mysqli_stmt_close($insertStmt);
-            throw new Exception('Không thể thêm món ăn: ' . ($item['name'] ?? $menuId));
-        }
-        mysqli_stmt_close($insertStmt);
+    if (!$bookingId) {
+        throw new Exception($bookingModel->getLastError() ?: 'Không thể tạo đơn đặt bàn.');
     }
+
+    $menuTotal = array_sum(array_map(static fn($item) => ((float)($item['price'] ?? 0)) * ((int)($item['quantity'] ?? 0)), $cartItems));
+    $deposit = DepositCalculator::calculate($bookingDateTime, $menuTotal);
+
+    if ($deposit > 0) {
+        header("Location: ../../../index.php?page=booking&action=payment&id={$bookingId}");
+    } else {
+        header("Location: ../../../index.php?page=booking&action=success&id={$bookingId}");
+    }
+    exit();
+} catch (Exception $e) {
+    echo $e->getMessage();
+    exit();
 }
-?>
