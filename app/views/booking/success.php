@@ -1,95 +1,111 @@
-<!doctype html>
-<html lang="vi">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Đặt bàn thành công</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <style>
-        .success-container { max-width: 600px; margin: 50px auto; padding: 30px; }
-        .success-icon { font-size: 5rem; color: #28a745; margin-bottom: 20px; }
-        .info-card { background: #fff; border-radius: 15px; padding: 25px; box-shadow: 0 2px 15px rgba(0,0,0,0.1); margin: 20px 0; }
-        .status-badge { display: inline-block; padding: 8px 16px; border-radius: 20px; font-weight: bold; margin: 10px 0; }
-        .status-paid { background: #d1edff; color: #0066cc; }
-        .btn-custom { border-radius: 25px; padding: 12px 30px; font-weight: bold; }
-    </style>
-</head>
-<body class="bg-light">
-    
+<?php
+$statusLabel = 'Đang xử lý';
+$statusClass = 'bg-secondary text-white';
+
+if (!empty($booking['TrangThai'])) {
+    switch ($booking['TrangThai']) {
+        case 'da_xac_nhan':
+            $statusLabel = 'Đã xác nhận';
+            $statusClass = 'bg-primary text-white';
+            break;
+        case 'cho_xac_nhan':
+            $statusLabel = 'Chờ xác nhận';
+            $statusClass = 'bg-warning text-dark';
+            break;
+        case 'hoan_thanh':
+            $statusLabel = 'Hoàn thành';
+            $statusClass = 'bg-success text-white';
+            break;
+        case 'da_huy':
+            $statusLabel = 'Đã hủy';
+            $statusClass = 'bg-danger text-white';
+            break;
+    }
+}
+
+$timeline = $bookingHistory['timeline'] ?? [];
+$canCancel = $booking && in_array($booking['TrangThai'] ?? '', ['cho_xac_nhan', 'da_xac_nhan'], true);
+$title = 'Chi tiết đặt bàn';
+$additional_head = <<<'HTML'
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+    .booking-success-page {
+        background: #f7f8fb;
+        padding: 40px 16px 64px;
+    }
+    .success-container { max-width: 860px; margin: 0 auto; padding: 24px 0; }
+    .success-icon { font-size: 4.5rem; color: #198754; margin-bottom: 20px; }
+    .info-card { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,.08); margin: 20px 0; }
+    .status-badge { display: inline-block; padding: 8px 16px; border-radius: 999px; font-weight: 600; }
+    .btn-custom { border-radius: 999px; padding: 12px 24px; font-weight: 600; }
+    .timeline { position: relative; margin-top: 12px; }
+    .timeline::before { content: ''; position: absolute; left: 10px; top: 6px; bottom: 6px; width: 2px; background: #dfe3e8; }
+    .timeline-item { position: relative; padding-left: 34px; margin-bottom: 16px; }
+    .timeline-dot { position: absolute; left: 3px; top: 6px; width: 16px; height: 16px; border-radius: 50%; background: #198754; border: 3px solid #d1fae5; }
+    .timeline-meta { font-size: .875rem; color: #6c757d; }
+    .cancel-box { background: #fff8f8; border: 1px solid #f5c2c7; border-radius: 16px; padding: 20px; }
+</style>
+HTML;
+$additional_scripts = <<<'HTML'
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+HTML;
+?>
+
+<section class="booking-success-page">
     <div class="success-container text-center">
-        
-        <!-- Icon thành công -->
         <div class="success-icon">
-            <i class="bi bi-check-circle-fill"></i>
+            <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
         </div>
-        
+
         <h1 class="text-success mb-3">Đặt bàn thành công!</h1>
-        <p class="lead text-muted mb-4">Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi</p>
-        
+        <p class="lead text-muted mb-4">Thông tin booking của bạn đã được lưu vào hệ thống.</p>
+
+        <?php if (!empty($_SESSION['success_message'])): ?>
+            <div class="alert alert-success"><?= htmlspecialchars($_SESSION['success_message']) ?></div>
+            <?php unset($_SESSION['success_message']); ?>
+        <?php endif; ?>
+
+        <?php if (!empty($_SESSION['error_message'])): ?>
+            <div class="alert alert-danger"><?= htmlspecialchars($_SESSION['error_message']) ?></div>
+            <?php unset($_SESSION['error_message']); ?>
+        <?php endif; ?>
+
         <?php if ($booking): ?>
-        
-        <!-- Thông tin đặt bàn -->
         <div class="info-card text-start">
-            <h5 class="text-primary mb-3">
-                <i class="bi bi-receipt"></i>
-                Thông tin đặt bàn
-            </h5>
-            
+            <h5 class="text-primary mb-3"><i class="fa-solid fa-receipt me-2" aria-hidden="true"></i>Thông tin đặt bàn</h5>
+
             <div class="row mb-2">
                 <div class="col-sm-4"><strong>Mã đặt bàn:</strong></div>
-                <div class="col-sm-8">#DB<?= $booking['MaDon'] ?></div>
+                <div class="col-sm-8">#DB<?= (int)$booking['MaDon'] ?></div>
             </div>
-            
             <div class="row mb-2">
                 <div class="col-sm-4"><strong>Khách hàng:</strong></div>
-                <div class="col-sm-8"><?= htmlspecialchars($booking['TenKH']) ?></div>
+                <div class="col-sm-8"><?= htmlspecialchars($booking['TenKH'] ?? '') ?></div>
             </div>
-            
             <div class="row mb-2">
                 <div class="col-sm-4"><strong>Số điện thoại:</strong></div>
-                <div class="col-sm-8"><?= htmlspecialchars($booking['SDT']) ?></div>
+                <div class="col-sm-8"><?= htmlspecialchars($booking['SDT'] ?? '') ?></div>
             </div>
-            
             <div class="row mb-2">
                 <div class="col-sm-4"><strong>Chi nhánh:</strong></div>
-                <div class="col-sm-8"><?= htmlspecialchars($booking['TenCoSo']) ?></div>
+                <div class="col-sm-8"><?= htmlspecialchars($booking['TenCoSo'] ?? '') ?></div>
             </div>
-            
             <div class="row mb-2">
                 <div class="col-sm-4"><strong>Thời gian:</strong></div>
-                <div class="col-sm-8"><?= date('d/m/Y \l\ú\c H:i', strtotime($booking['ThoiGianBatDau'])) ?></div>
+                <div class="col-sm-8"><?= !empty($booking['ThoiGianBatDau']) ? date('d/m/Y H:i', strtotime($booking['ThoiGianBatDau'])) : '-' ?></div>
             </div>
-            
             <div class="row mb-2">
                 <div class="col-sm-4"><strong>Số người:</strong></div>
-                <div class="col-sm-8"><?= $booking['SoLuongKH'] ?> người</div>
+                <div class="col-sm-8"><?= (int)($booking['SoLuongKH'] ?? 0) ?> người</div>
             </div>
-            
+            <div class="row mb-2">
+                <div class="col-sm-4"><strong>Bàn:</strong></div>
+                <div class="col-sm-8"><?= htmlspecialchars($booking['DanhSachBan'] ?? 'Chưa gán bàn') ?></div>
+            </div>
             <div class="row mb-3">
                 <div class="col-sm-4"><strong>Trạng thái:</strong></div>
-                <div class="col-sm-8">
-                    <?php 
-                    switch($booking['TrangThai']) {
-                        case 'da_xac_nhan':
-                            echo '<span class="status-badge status-paid">Đã thanh toán & Xác nhận</span>';
-                            break;
-                        case 'cho_xac_nhan':
-                            echo '<span class="status-badge bg-warning text-dark">Chờ thanh toán</span>';
-                            break;
-                        case 'hoan_thanh':
-                            echo '<span class="status-badge bg-success text-white">Hoàn thành</span>';
-                            break;
-                        case 'da_huy':
-                            echo '<span class="status-badge bg-danger text-white">Đã hủy</span>';
-                            break;
-                        default:
-                            echo '<span class="status-badge bg-secondary text-white">Đang xử lý</span>';
-                    }
-                    ?>
-                </div>
+                <div class="col-sm-8"><span class="status-badge <?= $statusClass ?>"><?= htmlspecialchars($statusLabel) ?></span></div>
             </div>
-            
             <?php if (!empty($booking['GhiChu'])): ?>
             <div class="row">
                 <div class="col-sm-4"><strong>Ghi chú:</strong></div>
@@ -97,81 +113,66 @@
             </div>
             <?php endif; ?>
         </div>
-        
-        <?php endif; ?>
-        
-        <!-- Hướng dẫn tiếp theo -->
-        <div class="info-card">
-            <h5 class="text-info mb-3">
-                <i class="bi bi-info-circle-fill"></i>
-                Hướng dẫn tiếp theo
-            </h5>
-            
-            <?php if ($booking && $booking['TrangThai'] === 'da_xac_nhan'): ?>
-            <ul class="text-start list-unstyled">
-                <li class="mb-2">
-                    <i class="bi bi-check text-success me-2"></i>
-                    Bàn của bạn đã được xác nhận và giữ chỗ
-                </li>
-                <li class="mb-2">
-                    <i class="bi bi-clock text-primary me-2"></i>
-                    Vui lòng có mặt tại nhà hàng đúng giờ đã đặt
-                </li>
-                <li class="mb-2">
-                    <i class="bi bi-telephone text-info me-2"></i>
-                    Hotline hỗ trợ: <strong>0922.782.387</strong>
-                </li>
-            </ul>
+
+        <div class="info-card text-start">
+            <h5 class="text-info mb-3"><i class="fa-solid fa-clock-rotate-left me-2" aria-hidden="true"></i>Lịch sử booking</h5>
+            <?php if (!empty($timeline)): ?>
+                <div class="timeline">
+                    <?php foreach ($timeline as $event): ?>
+                        <div class="timeline-item">
+                            <span class="timeline-dot"></span>
+                            <div class="fw-semibold"><?= htmlspecialchars($event['action'] ?? '') ?></div>
+                            <div class="timeline-meta">
+                                <?= !empty($event['createdAt']) ? date('d/m/Y H:i', strtotime($event['createdAt'])) : '-' ?>
+                                <?php if (!empty($event['actorName'])): ?> - <?= htmlspecialchars($event['actorName']) ?><?php endif; ?>
+                                <?php if (!empty($event['actorType'])): ?> (<?= htmlspecialchars($event['actorType']) ?>)<?php endif; ?>
+                            </div>
+                            <?php if (!empty($event['note'])): ?>
+                                <div><?= nl2br(htmlspecialchars($event['note'])) ?></div>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
             <?php else: ?>
-            <ul class="text-start list-unstyled">
-                <li class="mb-2">
-                    <i class="bi bi-exclamation-triangle text-warning me-2"></i>
-                    Bạn cần hoàn thành thanh toán để xác nhận đặt bàn
-                </li>
-                <li class="mb-2">
-                    <i class="bi bi-credit-card text-primary me-2"></i>
-                    <a href="?page=booking&action=payment&id=<?= $booking['MaDon'] ?>">
-                        Thanh toán ngay
-                    </a>
-                </li>
-            </ul>
+                <div class="text-muted">Chưa có lịch sử booking để hiển thị.</div>
             <?php endif; ?>
         </div>
-        
-        <!-- Buttons -->
-        <div class="d-flex flex-wrap gap-3 justify-content-center">
-            <?php if ($booking && $booking['TrangThai'] === 'cho_xac_nhan'): ?>
-            <a href="?page=booking&action=payment&id=<?= $booking['MaDon'] ?>" 
-               class="btn btn-success btn-custom">
-                <i class="bi bi-credit-card me-2"></i>
-                Thanh toán ngay
+
+        <?php if ($canCancel): ?>
+        <div class="info-card text-start">
+            <div class="cancel-box">
+                <h5 class="text-danger mb-3"><i class="fa-solid fa-ban me-2" aria-hidden="true"></i>Hủy đặt bàn</h5>
+                <form method="POST" action="?page=booking&action=cancel" class="row g-3">
+                    <input type="hidden" name="booking_id" value="<?= (int)$booking['MaDon'] ?>">
+                    <div class="col-md-6">
+                        <label class="form-label">Xác thực số điện thoại</label>
+                        <input type="text" class="form-control" name="customer_phone_verify" required placeholder="Nhập đúng số điện thoại đã đặt bàn">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Lý do hủy</label>
+                        <input type="text" class="form-control" name="cancel_reason" required placeholder="Ví dụ: thay đổi kế hoạch">
+                    </div>
+                    <div class="col-12 d-flex justify-content-end">
+                        <button type="submit" class="btn btn-outline-danger btn-custom">Hủy đặt bàn</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <?php endif; ?>
+        <?php endif; ?>
+
+        <div class="d-flex flex-wrap gap-3 justify-content-center mt-4">
+            <?php if ($booking && ($booking['TrangThai'] ?? '') === 'cho_xac_nhan'): ?>
+            <a href="?page=booking&action=payment&id=<?= (int)$booking['MaDon'] ?>" class="btn btn-success btn-custom">
+                <i class="fa-solid fa-credit-card me-2" aria-hidden="true"></i>Thanh toán ngay
             </a>
             <?php endif; ?>
-            
             <a href="?page=booking&action=create" class="btn btn-primary btn-custom">
-                <i class="bi bi-plus-circle me-2"></i>
-                Đặt bàn mới
+                <i class="fa-solid fa-plus me-2" aria-hidden="true"></i>Đặt bàn mới
             </a>
-            
             <a href="?page=home" class="btn btn-outline-secondary btn-custom">
-                <i class="bi bi-house me-2"></i>
-                Về trang chủ
+                <i class="fa-solid fa-house me-2" aria-hidden="true"></i>Về trang chủ
             </a>
         </div>
-        
-        <!-- Footer thông tin liên hệ -->
-        <div class="text-center mt-5">
-            <p class="text-muted mb-2">
-                <i class="bi bi-geo-alt-fill me-1"></i>
-                Hệ thống nhà hàng cao cấp
-            </p>
-            <p class="small text-muted">
-                Cảm ơn bạn đã tin tưởng và sử dụng dịch vụ của chúng tôi!
-            </p>
-        </div>
-        
     </div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+</section>

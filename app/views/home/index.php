@@ -158,6 +158,7 @@
             <!-- Button xem thực đơn -->
             <div class="section-cta">
                 <a href="?page=menu" class="btn-booking">XEM THỰC ĐƠN</a>
+                <a href="?page=booking&action=lookup" class="btn-booking" style="margin-left: 12px;">TRA C&#7912;U &#272;&#7862;T B&#192;N</a>
             </div>
         </div>
     </section>
